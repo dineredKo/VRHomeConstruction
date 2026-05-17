@@ -9,5 +9,13 @@
     font-size: 1.5rem;
     color: #666;
     text-decoration: none;
+    display: flex;
+    align-items: center;
+  }
+
+  .homeIcon {
+    width: 28px;
+    height: 28px;
+    color: #030923;
   }
 }

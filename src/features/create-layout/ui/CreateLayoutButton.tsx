@@ -1,3 +1,8 @@
+/**
+ * Кнопка для открытия модалки создания макета.
+ * @module create-layout/ui/CreateLayoutButton
+ */
+
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { ModalsFeature } from '@/features/modals';

@@ -1,3 +1,8 @@
+/**
+ * Кнопка для открытия модалки создания проекта.
+ * @module create-project/ui/CreateProjectButton
+ */
+
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { ModalsFeature } from '@/features/modals';

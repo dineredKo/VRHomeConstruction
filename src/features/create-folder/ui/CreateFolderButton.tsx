@@ -1,3 +1,8 @@
+/**
+ * Кнопка для открытия модалки создания папки.
+ * @module create-folder/ui/CreateFolderButton
+ */
+
 import React from 'react';
 import styles from './CreateFolderButton.module.scss';
 

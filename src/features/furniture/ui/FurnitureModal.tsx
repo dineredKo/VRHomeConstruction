@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+/**
+ * Модальное окно редактирования мебели.
+ * Позволяет изменять позицию, масштаб и поворот с мгновенным применением через ползунки.
+ * @module furniture/ui/FurnitureModal
+ */
+
+import React, { useState } from 'react';
 import type { FurnitureItem } from '../types';
-import {
-  FURNITURE_MARGIN_XZ,
-  FURNITURE_MARGIN_Y,
-  DEFAULT_MODEL_HALF_WIDTH,
-  DEFAULT_MODEL_HALF_DEPTH,
-  DEFAULT_MODEL_HEIGHT,
-} from '@/features/editor-3d/constants';
 
 interface FurnitureModalProps {
   item: FurnitureItem;
@@ -19,10 +18,10 @@ interface FurnitureModalProps {
 }
 
 /**
- * Модальное окно для редактирования мебели (позиция, масштаб, поворот).
- * Принимает реальные размеры комнаты и модели, автоматически ограничивает диапазоны ползунков.
+ * Компонент модального окна для редактирования параметров мебели.
+ * Изменения применяются мгновенно при движении ползунков.
  */
-export const FurnitureModal: React.FC<FurnitureModalProps> = ({
+export const FurnitureModal: React.FC<FurnitureModalProps> = React.memo(({
   item,
   roomWidth,
   roomDepth,
@@ -39,73 +38,49 @@ export const FurnitureModal: React.FC<FurnitureModalProps> = ({
   const [rotY, setRotY] = useState(item.rotation[1] * (180 / Math.PI));
   const [rotZ, setRotZ] = useState(item.rotation[2] * (180 / Math.PI));
 
-  // Синхронизируем локальное состояние с item при каждом изменении item
-  useEffect(() => {
-    setPosX(item.position[0]);
-    setPosY(item.position[1]);
-    setPosZ(item.position[2]);
-    setScale(item.scale);
-    setRotX(item.rotation[0] * (180 / Math.PI));
-    setRotY(item.rotation[1] * (180 / Math.PI));
-    setRotZ(item.rotation[2] * (180 / Math.PI));
-  }, [item]);
+  const halfW = roomWidth / 2;
+  const halfD = roomDepth / 2;
 
-  // Реальная высота модели
-  const modelHeight = item.height ?? DEFAULT_MODEL_HEIGHT;
-  const halfW = (item.halfWidth ?? DEFAULT_MODEL_HALF_WIDTH) * scale;
-  const halfD = (item.halfDepth ?? DEFAULT_MODEL_HALF_DEPTH) * scale;
-  const h = modelHeight * scale;
+  const percentX = Math.round(((posX + halfW) / roomWidth) * 100);
+  const percentZ = Math.round(((posZ + halfD) / roomDepth) * 100);
 
-  // Границы с учётом отступов
-  const marginX = (roomWidth * FURNITURE_MARGIN_XZ) / 100;
-  const marginZ = (roomDepth * FURNITURE_MARGIN_XZ) / 100;
-  const marginY = (roomHeight * FURNITURE_MARGIN_Y) / 100;
-
-  const minX = -roomWidth / 2 + halfW + marginX;
-  const maxX = roomWidth / 2 - halfW - marginX;
-  const minZ = -roomDepth / 2 + halfD + marginZ;
-  const maxZ = roomDepth / 2 - halfD - marginZ;
-  const minY = h / 2 + marginY;
-  const maxY = roomHeight - h / 2 - marginY;
-
-  const rangeX = maxX - minX;
-  const rangeZ = maxZ - minZ;
+  const modelHeight = item.height ?? 0.5;
+  const halfH = (modelHeight / 2) * scale;
+  const minY = -halfH;                  // низ модели на полу (Y=0), центр на -halfH
+  const maxY = roomHeight - halfH;      // верх модели у потолка
   const rangeY = maxY - minY;
-
-  const percentX = rangeX > 0 ? Math.round(((posX - minX) / rangeX) * 100) : 0;
-  const percentZ = rangeZ > 0 ? Math.round(((posZ - minZ) / rangeZ) * 100) : 0;
   const percentY = rangeY > 0 ? Math.round(((posY - minY) / rangeY) * 100) : 0;
 
-  const createUpdatedItem = (overrides: Partial<FurnitureItem>): FurnitureItem => ({
-    ...item,
-    position: [posX, posY, posZ],
-    scale,
-    rotation: [rotX * Math.PI / 180, rotY * Math.PI / 180, rotZ * Math.PI / 180],
-    ...overrides,
-  });
+  const update = (
+    newX: number, newY: number, newZ: number,
+    newScale: number,
+    newRot: [number, number, number]
+  ) => {
+    onUpdate({ ...item, position: [newX, newY, newZ], scale: newScale, rotation: newRot });
+  };
 
   const handlePercentX = (val: number) => {
-    const x = minX + (val / 100) * rangeX;
+    const x = (val / 100) * roomWidth - halfW;
     setPosX(x);
-    onUpdate(createUpdatedItem({ position: [x, posY, posZ] }));
+    update(x, posY, posZ, scale, [rotX * Math.PI / 180, rotY * Math.PI / 180, rotZ * Math.PI / 180]);
   };
   const handlePercentY = (val: number) => {
     const y = minY + (val / 100) * rangeY;
     setPosY(y);
-    onUpdate(createUpdatedItem({ position: [posX, y, posZ] }));
+    update(posX, y, posZ, scale, [rotX * Math.PI / 180, rotY * Math.PI / 180, rotZ * Math.PI / 180]);
   };
   const handlePercentZ = (val: number) => {
-    const z = minZ + (val / 100) * rangeZ;
+    const z = (val / 100) * roomDepth - halfD;
     setPosZ(z);
-    onUpdate(createUpdatedItem({ position: [posX, posY, z] }));
+    update(posX, posY, z, scale, [rotX * Math.PI / 180, rotY * Math.PI / 180, rotZ * Math.PI / 180]);
   };
   const handleScale = (val: number) => {
     setScale(val);
-    onUpdate(createUpdatedItem({ scale: val }));
+    update(posX, posY, posZ, val, [rotX * Math.PI / 180, rotY * Math.PI / 180, rotZ * Math.PI / 180]);
   };
-  const handleRotX = (val: number) => { setRotX(val); onUpdate(createUpdatedItem({ rotation: [val * Math.PI / 180, rotY * Math.PI / 180, rotZ * Math.PI / 180] })); };
-  const handleRotY = (val: number) => { setRotY(val); onUpdate(createUpdatedItem({ rotation: [rotX * Math.PI / 180, val * Math.PI / 180, rotZ * Math.PI / 180] })); };
-  const handleRotZ = (val: number) => { setRotZ(val); onUpdate(createUpdatedItem({ rotation: [rotX * Math.PI / 180, rotY * Math.PI / 180, val * Math.PI / 180] })); };
+  const handleRotX = (val: number) => { setRotX(val); update(posX, posY, posZ, scale, [val * Math.PI / 180, rotY * Math.PI / 180, rotZ * Math.PI / 180]); };
+  const handleRotY = (val: number) => { setRotY(val); update(posX, posY, posZ, scale, [rotX * Math.PI / 180, val * Math.PI / 180, rotZ * Math.PI / 180]); };
+  const handleRotZ = (val: number) => { setRotZ(val); update(posX, posY, posZ, scale, [rotX * Math.PI / 180, rotY * Math.PI / 180, val * Math.PI / 180]); };
 
   return (
     <div style={{
@@ -122,7 +97,7 @@ export const FurnitureModal: React.FC<FurnitureModalProps> = ({
         <label>Позиция X: {percentX}%</label>
         <input type="range" min="0" max="100" value={percentX} onChange={e => handlePercentX(Number(e.target.value))} style={{ width: '100%' }} />
         <label>Позиция Y (высота): {percentY}%</label>
-        <input type="range" min="0" max="100" value={percentY} onChange={e => handlePercentY(Number(e.target.value))} style={{ width: '100%' }} />
+        <input type="range" min="-50" max="100" value={percentY} onChange={e => handlePercentY(Number(e.target.value))} style={{ width: '100%' }} />
         <label>Позиция Z: {percentZ}%</label>
         <input type="range" min="0" max="100" value={percentZ} onChange={e => handlePercentZ(Number(e.target.value))} style={{ width: '100%' }} />
         <label>Масштаб: {scale.toFixed(2)}</label>
@@ -141,4 +116,4 @@ export const FurnitureModal: React.FC<FurnitureModalProps> = ({
       </div>
     </div>
   );
-};
+});

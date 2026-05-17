@@ -4,26 +4,26 @@
   border-left: 1px solid #ddd;
   padding: 16px;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  color: #31354D;
 }
 
 .title {
   font-size: 14px;
   font-weight: 600;
-  margin: 0;
+  margin: 0 0 8px 0;
+  color: #31354D;
 }
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin-bottom: 12px;
 }
 
 .label {
   font-size: 12px;
-  color: #666;
+  color: #31354D;
 }
 
 .input {
@@ -31,4 +31,12 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
+}
+
+.colorIcon {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-right: 6px;
+  color: #31354D;
 }

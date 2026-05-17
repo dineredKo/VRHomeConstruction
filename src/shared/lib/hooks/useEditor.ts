@@ -1,3 +1,9 @@
+/**
+ * Хук useEditor.
+ * Предоставляет доступ ко всем состояниям и действиям редактора 3D-сцены.
+ * @module shared/lib/hooks/useEditor
+ */
+
 import { useSelector, useDispatch } from 'react-redux';
 import { useCallback } from 'react';
 import { actions } from '@/features/editor-3d/slice';
@@ -20,17 +26,25 @@ export function useEditor() {
   const partitions = useSelector(selectors.selectPartitions);
   const selectedPartition = useSelector(selectors.selectSelectedPartition);
 
+  /** Установить размеры комнаты */
   const setDimensions = useCallback((dims: RoomDimensions) => dispatch(actions.setDimensions(dims)), [dispatch]);
+  /** Установить цвета */
   const setColors = useCallback((cols: RoomColors) => dispatch(actions.setColors(cols)), [dispatch]);
+  /** Установить освещение */
   const setLight = useCallback((config: LightConfig) => dispatch(actions.setLight(config)), [dispatch]);
+  /** Установить режим просмотра */
   const setViewMode = useCallback((mode: ViewMode) => dispatch(actions.setViewMode(mode)), [dispatch]);
+  /** Установить активный инструмент */
   const setActiveTool = useCallback((tool: Tool) => dispatch(actions.setActiveTool(tool)), [dispatch]);
+  /** Установить просматриваемую стену */
   const setViewedWallId = useCallback((id: string) => dispatch(actions.setViewedWallId(id)), [dispatch]);
 
+  /** Запросить создание проёма */
   const createOpening = useCallback((wallId: string, point: { x: number; y: number }) => {
     dispatch(actions.createOpeningRequested({ wallId, point }));
   }, [dispatch]);
 
+  /** Выбрать проём для редактирования */
   const selectOpening = useCallback((wallId: string, openingId: string, wallWidth: number, wallHeight: number) => {
     const opening = openings[wallId]?.find((o: Opening) => o.id === openingId);
     if (opening) {
@@ -38,36 +52,41 @@ export function useEditor() {
     }
   }, [dispatch, openings]);
 
+  /** Обновить проём */
   const updateOpening = useCallback((updated: Opening) => {
     if (selectedOpening) {
       dispatch(actions.updateOpening({ wallId: selectedOpening.wallId, opening: updated }));
     }
   }, [dispatch, selectedOpening]);
 
+  /** Удалить проём */
   const deleteOpening = useCallback((openingId: string) => {
-    dispatch(actions.deleteOpeningRequested({ openingId }));
-  }, [dispatch]);
+    if (selectedOpening) {
+      dispatch(actions.removeOpening({ wallId: selectedOpening.wallId, openingId }));
+      dispatch(actions.setSelectedOpening(null));
+    }
+  }, [dispatch, selectedOpening]);
 
+  /** Снять выделение с проёма */
   const clearSelectedOpening = useCallback(() => {
     dispatch(actions.setSelectedOpening(null));
   }, [dispatch]);
 
+  /** Добавить перегородку */
   const addPartition = useCallback((point: { x: number; z: number }, wallId?: string) => {
     const id = `part_${Date.now()}`;
     const maxWidth = Math.min(dimensions.width, dimensions.depth);
-    // размеры по умолчанию: ширина 1 м (или меньше, если комната мала), высота = высоте комнаты, толщина 0.1
     const defaultSize: [number, number, number] = [Math.min(1.0, maxWidth), dimensions.height, 0.1];
     let position: [number, number, number] = [point.x, dimensions.height / 2, point.z];
     let rotation: [number, number, number] = [0, 0, 0];
 
     if (wallId) {
       const halfW = defaultSize[0] / 2;
-      const innerX = dimensions.width / 2 - WALL_THICKNESS; // внутренняя граница по X
-      const innerZ = dimensions.depth / 2 - WALL_THICKNESS; // внутренняя граница по Z
+      const innerX = dimensions.width / 2 - WALL_THICKNESS;
+      const innerZ = dimensions.depth / 2 - WALL_THICKNESS;
 
       switch (wallId) {
         case 'front':
-          // перегородка перпендикулярна передней стене, её ширина направлена внутрь (по Z)
           position = [point.x, dimensions.height / 2, innerZ - halfW];
           rotation = [0, Math.PI / 2, 0];
           break;
@@ -76,7 +95,6 @@ export function useEditor() {
           rotation = [0, Math.PI / 2, 0];
           break;
         case 'left':
-          // перегородка параллельна левой стене, её ширина направлена внутрь (по X)
           position = [-innerX + halfW, dimensions.height / 2, point.z];
           rotation = [0, 0, 0];
           break;
@@ -94,33 +112,36 @@ export function useEditor() {
       rotation,
       size: defaultSize,
       openings: [],
-      color: colors.walls,
     }));
     return id;
-  }, [dispatch, dimensions, colors]);
+  }, [dispatch, dimensions]);
 
-  // ... остальные функции (updatePartition, deletePartition и т.д.) без изменений
-
+  /** Обновить перегородку */
   const updatePartition = useCallback((partition: Partition) => {
     dispatch(actions.updatePartition(partition));
   }, [dispatch]);
 
+  /** Удалить перегородку */
   const deletePartition = useCallback((id: string) => {
     dispatch(actions.removePartition(id));
   }, [dispatch]);
 
+  /** Выбрать перегородку */
   const selectPartition = useCallback((partition: Partition) => {
     dispatch(actions.setSelectedPartition(partition));
   }, [dispatch]);
 
+  /** Снять выделение с перегородки */
   const clearSelectedPartition = useCallback(() => {
     dispatch(actions.setSelectedPartition(null));
   }, [dispatch]);
 
+  /** Добавить проём в перегородку */
   const addOpeningToPartition = useCallback((partitionId: string, opening: Opening) => {
     dispatch(actions.addOpeningToPartition({ partitionId, opening }));
   }, [dispatch]);
 
+  /** Удалить проём из перегородки */
   const removeOpeningFromPartition = useCallback((partitionId: string, openingId: string) => {
     dispatch(actions.removeOpeningFromPartition({ partitionId, openingId }));
   }, [dispatch]);

@@ -1,3 +1,9 @@
+/**
+ * Модальное окно создания проекта.
+ * Позволяет ввести название и создать проект.
+ * @module create-project/ui/CreateProjectModal
+ */
+
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ModalsFeature } from '@/features/modals';

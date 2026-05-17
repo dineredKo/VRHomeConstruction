@@ -1,5 +1,4 @@
 .sidebar {
-  width: 260px;
   background: #ffffff;
   border-right: 1px solid #ddd;
   padding: 16px;
@@ -7,29 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sectionTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.furnitureList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  max-height: 200px;
-  overflow-y: auto;
+  color: #31354D;
 }
 
 .tabs {
@@ -45,31 +22,26 @@
   border-radius: 4px;
   font-size: 12px;
   cursor: pointer;
+  color: #31354D;
   &.active {
     background: #667eea;
     color: white;
   }
 }
+
 .section {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-.hint {
-  font-size: 11px;
-  color: #666;
-}
 
-.furnitureBtn {
-  padding: 4px 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: #f9f9f9;
-  cursor: pointer;
-  font-size: 12px;
-  transition: 0.2s;
-  &:hover { background: #eee; }
-  &.active { background: #667eea; color: white; border-color: #667eea; }
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #31354D;
 }
 
 .list {
@@ -83,21 +55,19 @@
 
 .item {
   font-size: 13px;
-  color: #555;
   padding: 6px 8px;
   border-radius: 4px;
   cursor: pointer;
+  color: #31354D;
   &:hover {
     background-color: #f0f0f0;
-    color: #000;
+    color: #31354D;
   }
 }
 
-.commentsPlaceholder {
-  font-size: 12px;
-  color: #999;
-  padding: 8px;
-  font-style: italic;
+.hint {
+  font-size: 11px;
+  color: #666;
 }
 
 .tools {
@@ -115,14 +85,42 @@
   font-size: 14px;
   text-align: left;
   transition: 0.2s;
-  
+  color: #31354D;
   &:hover {
     background: #eee;
   }
-
   &.active {
     background: #667eea;
     color: white;
     border-color: #667eea;
   }
+}
+
+.furnitureList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.furnitureBtn {
+  padding: 4px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f9f9f9;
+  cursor: pointer;
+  font-size: 12px;
+  transition: 0.2s;
+  color: #31354D;
+  &:hover { background: #eee; }
+  &.active { background: #667eea; color: white; border-color: #667eea; }
+}
+
+.toolIcon {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  vertical-align: middle;
+  fill: #31354D;
 }

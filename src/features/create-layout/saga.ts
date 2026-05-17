@@ -1,3 +1,8 @@
+/**
+ * Саги для создания макетов.
+ * @module create-layout/saga
+ */
+
 import { takeLatest, put, select, all, delay } from 'typed-redux-saga';
 import { ModalsFeature } from '@/features/modals';
 import { SearchFeature } from '@/features/search';

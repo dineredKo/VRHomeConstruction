@@ -1,3 +1,8 @@
+/**
+ * Redux Slice для создания макетов.
+ * @module create-layout/slice
+ */
+
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Layout } from './types';
 
@@ -19,29 +24,35 @@ export const { actions, name, reducer } = createSlice({
   name: 'createLayout',
   initialState,
   reducers: {
+    /** Установить название макета */
     setLayoutName: (state, action: PayloadAction<string>) => {
       state.layoutName = action.payload;
       state.error = null;
     },
+    /** Установить флаг загрузки */
     setIsLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
+    /** Установить ошибку */
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
       state.isLoading = false;
     },
+    /** Сбросить форму */
     resetForm: (state) => {
       state.layoutName = '';
       state.isLoading = false;
       state.error = null;
     },
+    /** Добавить макет в список */
     addLayout: (state, action: PayloadAction<Layout>) => {
       state.layouts.push(action.payload);
     },
+    /** Удалить макет */
     removeLayout: (state, action: PayloadAction<string>) => {
       state.layouts = state.layouts.filter(l => l.id !== action.payload);
     },
-    createLayoutRequested: (state) => {
-    },
+    /** Запрос на создание макета (сага) */
+    createLayoutRequested: (state) => {},
   },
 });

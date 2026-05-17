@@ -1,3 +1,8 @@
+/**
+ * Типы для фичи папок (полная версия).
+ * @module folders/types
+ */
+
 export interface Folder {
   id: string;
   name: string;

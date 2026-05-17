@@ -1,3 +1,9 @@
+/**
+ * Компонент стены с проёмами (окнами/дверями).
+ * Автоматически разбивает стену на сегменты, исключая области проёмов, и отображает кнопки для их редактирования.
+ * @module editor-3d/ui/WallWithOpenings
+ */
+
 import React, { useMemo } from 'react';
 import { Html } from '@react-three/drei';
 import { DoubleSide } from 'three';
@@ -14,6 +20,10 @@ interface WallWithOpeningsProps {
   onOpeningClick?: (openingId: string) => void;
 }
 
+/**
+ * Компонент стены, мемоизирован для производительности.
+ * Строит геометрию стены с вырезанными проёмами и рендерит HTML-кнопки для каждого проёма.
+ */
 export const WallWithOpenings: React.FC<WallWithOpeningsProps> = React.memo(({
   position,
   rotation,
@@ -90,7 +100,6 @@ export const WallWithOpenings: React.FC<WallWithOpeningsProps> = React.memo(({
             <meshStandardMaterial color={color} side={DoubleSide} />
           </mesh>
         ))}
-        {/* Кнопки для проёмов */}
         {openings.map((op) => (
           <Html
             key={op.id}

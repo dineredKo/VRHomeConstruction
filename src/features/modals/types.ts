@@ -1,3 +1,8 @@
+/**
+ * Типы для фичи модальных окон.
+ * @module modals/types
+ */
+
 export interface ModalsState {
   isCreateProjectModalOpen: boolean;
   isCreateFolderModalOpen: boolean;

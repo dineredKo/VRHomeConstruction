@@ -1,6 +1,12 @@
+/**
+ * Карточка макета.
+ * @module widgets/LayoutsGrid/ui/LayoutCard
+ */
+
 import React from 'react';
 import classNames from 'classnames';
 import styles from './LayoutCard.module.scss';
+import OptionsIcon from '@/shared/ui/icons/options.svg'
 
 interface LayoutCardProps {
   id: string;
@@ -31,7 +37,7 @@ export const LayoutCard: React.FC<LayoutCardProps> = ({ id, name, isActive, onCl
             onMenuClick?.(id);
           }}
         >
-          ⋮
+          <OptionsIcon className={styles.menuIcon} />
         </button>
       </div>
     </div>

@@ -1,9 +1,16 @@
+/**
+ * Саги для создания папок.
+ * Обрабатывают создание папки и добавляют её в общее хранилище.
+ * @module create-folder/saga
+ */
+
 import { takeLatest, put, select, all } from 'typed-redux-saga';
 import { ModalsFeature } from '@/features/modals';
 import { foldersActions } from '@/features/folders';
 import { actions } from './slice';
 import { selectors } from './selectors';
 
+/** Сага создания папки: валидирует, добавляет папку через foldersActions */
 function* handleCreateFolder() {
   try {
     const folderName: string = yield* select(selectors.selectFolderName);

@@ -1,3 +1,9 @@
+/**
+ * Саги для папок.
+ * Обрабатывают поиск по папкам.
+ * @module folders/saga
+ */
+
 import { takeLatest, put, select, all } from 'typed-redux-saga';
 import { SearchFeature } from '@/features/search';
 import { selectors } from './selectors';

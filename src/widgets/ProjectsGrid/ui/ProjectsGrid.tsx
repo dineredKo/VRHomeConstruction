@@ -1,6 +1,11 @@
+/**
+ * Сетка проектов на главной странице.
+ * @module widgets/ProjectsGrid/ui/ProjectsGrid
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { CreateProjectFeature } from '@/features/create-project';
 import { SearchFeature } from '@/features/search';
 import { foldersActions, foldersSelectors } from '@/features/folders';

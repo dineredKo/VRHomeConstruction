@@ -1,3 +1,9 @@
+/**
+ * Страница редактора проекта.
+ * Собирает все виджеты редактора: хедер, сайдбар, сцену, панели свойств и модалки.
+ * @module pages/project-editor/ui/ProjectEditorPage
+ */
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -7,7 +13,6 @@ import { EditorSidebar } from '@/widgets/editor-sidebar';
 import { EditorScene } from '@/features/editor-3d/ui/EditorScene';
 import { EditorPropertiesPanel } from '@/widgets/editor-properties-panel';
 import { OpeningModal } from '@/features/editor-3d/ui/OpeningModal';
-import { PartitionModal } from '@/features/editor-3d/ui/PartitionModal';
 import { FurnitureModal } from '@/features/furniture/ui/FurnitureModal';
 import { LightingModal } from '@/features/editor-3d/ui/LightingModal';
 import { useEditor } from '@/shared/lib/hooks/useEditor';
@@ -52,7 +57,6 @@ export const ProjectEditorPage = () => {
             light={editor.light}
             viewMode={editor.viewMode}
             openings={editor.openings}
-            partitions={editor.partitions}
             onWallClick={(wallId, point) => {
               if (editor.activeTool === 'window' || editor.activeTool === 'door') {
                 editor.createOpening(wallId, point);
@@ -63,26 +67,13 @@ export const ProjectEditorPage = () => {
             onOpeningClick={editor.selectOpening}
             furnitureItems={furniture.items}
             onFloorClick={(point) => {
-              if (editor.activeTool === 'partition') {
-                const id = editor.addPartition(point);
-                const newPartition = editor.partitions.find(p => p.id === id);
-                if (newPartition) editor.selectPartition(newPartition);
-                editor.setActiveTool('select');
-              } else if (editor.activeTool === 'furniture') {
+              if (editor.activeTool === 'furniture') {
                 const added = furniture.addFurniture(point, true);
                 if (added) editor.setActiveTool('select');
               }
             }}
             onFurnitureClick={(item) => furniture.selectFurniture(item.id)}
             onFurnitureReady={furniture.onReady}
-            onPartitionClick={(partition) => editor.selectPartition(partition)}
-            onPartitionOpeningClick={(partitionId, openingId) => {}}
-            onPartitionCreateOnWall={(wallId, x, z) => {
-              const id = editor.addPartition({ x, z }, wallId);
-              const newPartition = editor.partitions.find(p => p.id === id);
-              if (newPartition) editor.selectPartition(newPartition);
-              editor.setActiveTool('select');
-            }}
           />
         </div>
         <EditorPropertiesPanel
@@ -103,22 +94,6 @@ export const ProjectEditorPage = () => {
           onClose={editor.clearSelectedOpening}
         />
       )}
-      {editor.selectedPartition && (
-        <PartitionModal
-          partition={editor.selectedPartition}
-          roomWidth={editor.dimensions.width}
-          roomDepth={editor.dimensions.depth}
-          roomHeight={editor.dimensions.height}
-          onUpdate={(updated) => {
-            editor.updatePartition(updated);
-          }}
-          onDelete={(id) => {
-            editor.deletePartition(id);
-            editor.clearSelectedPartition();
-          }}
-          onClose={editor.clearSelectedPartition}
-        />
-      )}
       {furniture.showModal && furniture.selectedFurniture && (
         <FurnitureModal
           item={furniture.selectedFurniture}
@@ -133,9 +108,9 @@ export const ProjectEditorPage = () => {
       {showLighting && (
         <LightingModal
           intensity={editor.light.intensity}
-          onApply={(intensity) => {
-            editor.setLight({ intensity, color: '#ffffff' });
-            setShowLighting(false);
+          ambientIntensity={editor.light.ambientIntensity}
+          onApply={(intensity, ambientIntensity) => {
+            editor.setLight({ intensity, ambientIntensity, color: '#ffffff' });
           }}
           onClose={() => setShowLighting(false)}
         />

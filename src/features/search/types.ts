@@ -1,3 +1,8 @@
+/**
+ * Типы для фичи поиска.
+ * @module search/types
+ */
+
 export interface SearchState {
   query: string;
   isSearching: boolean;

@@ -1,4 +1,10 @@
-import { takeLatest, put, select, all, delay } from 'typed-redux-saga';
+/**
+ * Саги для поиска.
+ * Выполняют поиск по проектам, макетам и папкам при изменении запроса.
+ * @module search/saga
+ */
+
+import { takeLatest, put, select, all } from 'typed-redux-saga';
 import { SearchFeature } from '@/features/search';  
 import { CreateProjectFeature } from '@/features/create-project';
 import { CreateLayoutFeature } from '@/features/create-layout';

@@ -1,5 +1,10 @@
+/**
+ * Страница "Мои проекты".
+ * @module pages/my-projects/ui/MyProjectPage
+ */
+
 import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { UniversalButtonFeature } from '@/features/universal-button';
 import { SearchBar } from '@/features/search/ui/SearchBar';
 import { ProjectsGrid } from '@/widgets/ProjectsGrid';
@@ -18,13 +23,11 @@ export const MyProjectsPage = () => {
           <UniversalButtonFeature.ui.UniversalButton />
         </div>
       </div>
-
       <div className={styles.searchRow}>
         <div className={styles.searchBarWrapper}>
           <SearchBar scope="global" />
         </div>
       </div>
-
       <ProjectsGrid />
     </div>
   );

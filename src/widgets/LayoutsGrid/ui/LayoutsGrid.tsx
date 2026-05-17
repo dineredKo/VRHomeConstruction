@@ -1,17 +1,23 @@
+/**
+ * Сетка макетов на странице "Макеты".
+ * @module widgets/LayoutsGrid/ui/LayoutsGrid
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { CreateLayoutFeature } from '@/features/create-layout';
 import { SearchFeature } from '@/features/search';
-import { foldersActions, foldersSelectors } from '@/features/folders';
 import { LayoutCard } from './LayoutCard';
 import { FolderPicker } from '@/features/folders/ui/FolderPicker';
+import TrashIcon from '@/shared/ui/icons/trashmainsceen.svg';
+import FolderIcon from '@/shared/ui/icons/folder.svg';
+import TagIcon from '@/shared/ui/icons/tag.svg';
 import type { Layout } from '@/features/create-layout/types';
 import styles from './LayoutsGrid.module.scss';
 
 export const LayoutsGrid = () => {
   const dispatch = useDispatch();
   const layouts = useSelector(CreateLayoutFeature.selectors.selectLayouts);
-  const folders = useSelector(foldersSelectors.selectFolders);
   const highlightedIds = useSelector(SearchFeature.selectors.selectHighlightedIds);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [visibleIds, setVisibleIds] = useState<string[]>([]);
@@ -39,18 +45,6 @@ export const LayoutsGrid = () => {
 
   const handleRemoveLayout = (layoutId: string) => {
     dispatch(CreateLayoutFeature.actions.removeLayout(layoutId));
-    folders.forEach(folder => {
-      if (folder.layoutIds.includes(layoutId)) {
-        dispatch(foldersActions.removeLayoutFromFolder({ folderId: folder.id, layoutId }));
-      }
-    });
-    setActiveMenuId(null);
-  };
-
-  const handleAddToFolder = (folderId: string) => {
-    if (activeMenuId) {
-      dispatch(foldersActions.addLayoutToFolder({ folderId, layoutId: activeMenuId }));
-    }
     setActiveMenuId(null);
   };
 
@@ -68,22 +62,18 @@ export const LayoutsGrid = () => {
           {activeMenuId === layout.id && (
             <div className={styles.layoutMenu}>
               <button className={styles.menuItem} onClick={() => handleRemoveLayout(layout.id)}>
-                🗑️ Удалить
+                <TrashIcon className={styles.menuIcon} /> Удалить
               </button>
               <div className={styles.folderDropdown}>
-                <button className={styles.menuItem}>📁 Добавить в папку</button>
+                <button className={styles.menuItem}>
+                  <FolderIcon className={styles.menuIcon} /> Добавить в папку
+                </button>
                 <div className={styles.folderList}>
-                  <FolderPicker onSelect={handleAddToFolder} />
+                  <FolderPicker onSelect={() => {}} />
                 </div>
               </div>
-              <button
-                className={styles.menuItem}
-                onClick={() => {
-                  console.log('Присвоить тег макету', layout.id);
-                  setActiveMenuId(null);
-                }}
-              >
-                🏷️ Присвоить тег
+              <button className={styles.menuItem}>
+                <TagIcon className={styles.menuIcon} /> Присвоить тег
               </button>
             </div>
           )}

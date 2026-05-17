@@ -1,3 +1,9 @@
+/**
+ * Компонент загружает и отображает 3D-модель мебели.
+ * После загрузки измеряет габариты и сообщает их через колбэк onReady.
+ * @module furniture/ui/FurnitureModel
+ */
+
 import { useEffect, useRef } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { Box3, Group, Light } from 'three';
@@ -11,6 +17,10 @@ interface FurnitureModelProps {
   onReady?: (info: { halfWidth: number; halfDepth: number; height: number }) => void;
 }
 
+/**
+ * Компонент модели мебели.
+ * Отключает встроенные источники света модели и измеряет её габариты.
+ */
 export const FurnitureModel: React.FC<FurnitureModelProps> = ({
   path,
   position,

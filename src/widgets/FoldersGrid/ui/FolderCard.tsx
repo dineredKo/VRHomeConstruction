@@ -1,7 +1,13 @@
+/**
+ * Карточка папки.
+ * @module widgets/FoldersGrid/ui/FolderCard
+ */
+
 import React from 'react';
 import { Folder } from '@/features/folders/types';
 import classNames from 'classnames';
 import styles from './FolderCard.module.scss';
+import OptionsIcon from '@/shared/ui/icons/options.svg'
 
 interface FolderCardProps {
   folder: Folder;
@@ -41,7 +47,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
             onMenuToggle(folder.id);
           }}
         >
-          ⋮
+          <OptionsIcon className={styles.menuIcon} />
         </button>
       </div>
     </div>

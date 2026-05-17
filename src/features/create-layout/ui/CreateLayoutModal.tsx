@@ -1,3 +1,8 @@
+/**
+ * Модальное окно создания макета.
+ * @module create-layout/ui/CreateLayoutModal
+ */
+
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ModalsFeature } from '@/features/modals';

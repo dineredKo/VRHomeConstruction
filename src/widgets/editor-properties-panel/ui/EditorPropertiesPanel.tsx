@@ -1,7 +1,15 @@
+/**
+ * Панель свойств редактора.
+ * Позволяет изменять размеры комнаты и цвета стен/пола/потолка.
+ * @module widgets/editor-properties-panel/ui/EditorPropertiesPanel
+ */
+
 import React from 'react';
 import styles from './EditorPropertiesPanel.module.scss';
 import { RoomDimensions } from '@/features/editor-3d/ui/EditorScene';
 import type { RoomColors } from '@/features/editor-3d/types';
+
+import ColorAndTextureIcon from '@/shared/ui/icons/color and texture.svg';
 
 interface EditorPropertiesPanelProps {
   dimensions: RoomDimensions;
@@ -41,7 +49,9 @@ export const EditorPropertiesPanel: React.FC<EditorPropertiesPanelProps> = ({
         <input type="number" value={dimensions.depth} onChange={handleDimChange('depth')} step="0.1" min="1" />
       </div>
 
-      <h3 className={styles.title}>Цвета</h3>
+      <h3 className={styles.title}>
+        <ColorAndTextureIcon className={styles.colorIcon} /> Цвета
+      </h3>
       <div className={styles.field}>
         <label>Стены</label>
         <input type="color" value={colors.walls} onChange={handleColorChange('walls')} />

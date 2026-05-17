@@ -1,14 +1,21 @@
-import { defineConfig } from '@rsbuild/core'
-import { pluginReact } from '@rsbuild/plugin-react'
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSass } from '@rsbuild/plugin-sass';
+import { pluginSvgr } from '@rsbuild/plugin-svgr';
 
 export default defineConfig({
+  plugins: [
+    pluginReact(),
+    pluginSass(),
+    pluginSvgr({
+      svgrOptions: {
+        exportType: 'default',
+      },
+    }),
+  ],
   source: {
-    entry: {
-      index: './src/main.tsx', 
-    },
+    entry: { index: './src/main.tsx' },
   },
-  plugins: [pluginReact(), pluginSass()],
   html: {
     template: './public/index.html',
   },
@@ -33,30 +40,7 @@ export default defineConfig({
     },
   },
   tools: {
-    rspack: (config, { appendRules }) => {
-      appendRules([
-        {
-          test: /\.svg$/,
-          type: 'asset/resource',
-          generator: {
-            filename: 'assets/[name].[hash:8][ext]',
-          },
-          oneOf: [
-            {
-              issuer: /\.(js|jsx|ts|tsx)$/,
-              use: [
-                {
-                  loader: '@svgr/webpack',
-                  options: {
-                    icon: true,
-                    svgo: true,
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      ]);
+    rspack: (config) => {
       return config;
     },
   },

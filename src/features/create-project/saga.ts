@@ -1,9 +1,16 @@
+/**
+ * Саги для создания проектов.
+ * Обрабатывают создание проекта и поиск по проектам.
+ * @module create-project/saga
+ */
+
 import { takeLatest, put, select, all, delay } from 'typed-redux-saga';
 import { ModalsFeature } from '@/features/modals';
 import { SearchFeature } from '@/features/search';
 import { actions, name } from './slice';
 import { selectors } from './selectors';
 
+/** Сага создания проекта: валидирует, показывает загрузку, добавляет проект */
 function* handleCreateProject() {
   try {
     const projectName: string = yield* select(selectors.selectProjectName);
@@ -33,6 +40,7 @@ function* handleCreateProject() {
   }
 }
 
+/** Сага поиска проектов: фильтрует проекты по названию */
 function* handleSearchProjects() {
   try {
     const searchQuery = yield* select(SearchFeature.selectors.selectSearchQuery);

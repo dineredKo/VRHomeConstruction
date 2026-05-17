@@ -1,3 +1,9 @@
+/**
+ * Типы для фичи создания проектов.
+ * @module create-project/types
+ */
+
+/** Проект */
 export interface Project {
   id: string;
   name: string;
@@ -7,6 +13,7 @@ export interface Project {
   status: 'active' | 'archived';
 }
 
+/** Состояние формы создания проекта */
 export interface CreateProjectState {
   projectName: string;
   isLoading: boolean;

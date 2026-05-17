@@ -1,8 +1,13 @@
+/**
+ * Страница "Макеты".
+ * @module pages/layout/ui/LayoutsPage
+ */
+
 import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { UniversalButtonFeature } from '@/features/universal-button';
 import { SearchBar } from '@/features/search/ui/SearchBar';
-import { LayoutsGrid } from '@/widgets/LayoutsGrid'; 
+import { LayoutsGrid } from '@/widgets/LayoutsGrid';
 import styles from './LayoutsPage.module.scss';
 
 export const LayoutsPage = () => {
@@ -15,17 +20,15 @@ export const LayoutsPage = () => {
           <NavLink to="/layouts" className={`${styles.navItem} ${styles.active}`}>Макеты</NavLink>
         </nav>
         <div className={styles.addButton}>
-          <UniversalButtonFeature.ui.UniversalButton /> 
+          <UniversalButtonFeature.ui.UniversalButton />
         </div>
       </div>
-
       <div className={styles.searchRow}>
         <div className={styles.searchBarWrapper}>
           <SearchBar scope="global" />
         </div>
       </div>
-
-      <LayoutsGrid /> 
+      <LayoutsGrid />
     </div>
   );
 };

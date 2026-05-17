@@ -1,8 +1,8 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import { UniversalButtonFeature } from '@/features/universal-button';
+import { useDispatch } from 'react-redux';
 import { ModalsFeature } from '@/features/modals';
+import PlusIcon from '@/shared/ui/icons/plusmainscreen.svg';
 import styles from './UniversalButton.module.scss';
 
 export const UniversalButton: React.FC = () => {
@@ -21,7 +21,7 @@ export const UniversalButton: React.FC = () => {
 
   return (
     <button className={styles.button} onClick={handleClick}>
-      +
+      <PlusIcon className={styles.icon} />
     </button>
   );
 };

@@ -1,9 +1,15 @@
+/**
+ * Компонент комнаты: пол, стены, потолок и размещённая мебель.
+ * Реагирует на изменение размеров, цвета и списка проёмов/мебели.
+ * @module editor-3d/ui/Room
+ */
+
 import React from 'react';
 import { DoubleSide } from 'three';
 import { WallWithOpenings } from './WallWithOpenings';
-import { PartitionModel } from './PartitionModel';
 import { FurnitureModel } from '@/features/furniture/ui/FurnitureModel';
-import type { Opening, Partition, RoomColors } from '../types';
+import type { Opening } from '../types';
+import type { RoomColors } from '../types';
 import type { FurnitureItem } from '@/features/furniture/types';
 import { WALL_THICKNESS } from '../constants';
 import { getWallsData } from '../selectors';
@@ -12,24 +18,22 @@ interface RoomProps {
   dimensions: { width: number; height: number; depth: number };
   colors: RoomColors;
   openings: { [wallId: string]: Opening[] };
-  partitions?: Partition[];
   onWallClick?: (wallId: string, point: { x: number; y: number }) => void;
-  activeTool?: 'select' | 'window' | 'door' | 'furniture' | 'partition';
+  activeTool?: 'select' | 'window' | 'door' | 'furniture';
   onOpeningClick?: (wallId: string, openingId: string, wallWidth: number, wallHeight: number) => void;
   furnitureItems?: FurnitureItem[];
   onFloorClick?: (point: { x: number; z: number }) => void;
   onFurnitureClick?: (item: FurnitureItem) => void;
   onFurnitureReady?: (itemId: string, info: { halfWidth: number; halfDepth: number; height: number }) => void;
-  onPartitionClick?: (partition: Partition) => void;
-  onPartitionOpeningClick?: (partitionId: string, openingId: string) => void;
-  onPartitionCreateOnWall?: (wallId: string, x: number, z: number) => void;
 }
 
+/**
+ * Компонент комнаты, мемоизирован для предотвращения лишних перерисовок.
+ */
 export const Room: React.FC<RoomProps> = React.memo(({
   dimensions,
   colors,
   openings,
-  partitions,
   onWallClick,
   activeTool,
   onOpeningClick,
@@ -37,34 +41,38 @@ export const Room: React.FC<RoomProps> = React.memo(({
   onFloorClick,
   onFurnitureClick,
   onFurnitureReady,
-  onPartitionClick,
-  onPartitionOpeningClick,
-  onPartitionCreateOnWall,
 }) => {
   const { width, height, depth } = dimensions;
   const wallThickness = WALL_THICKNESS;
 
+  const walls = React.useMemo(() => getWallsData(width, height, depth), [width, height, depth]);
+
+  /**
+   * Обработчик клика по стене.
+   * Преобразует мировые координаты клика в локальные координаты стены и вызывает колбэк.
+   */
   const handleWallClick = (wallId: string) => (e: any) => {
     if (activeTool === 'window' || activeTool === 'door') {
       e.stopPropagation();
       if (e.point) {
+        const wallData = walls.find(w => w.id === wallId);
+        if (!wallData) return;
+
+        const [wallWidth, wallHeight] = wallData.size;
         const localPoint = e.object.worldToLocal(e.point.clone());
-        const clampedX = Math.max(-wallThickness / 2, Math.min(wallThickness / 2, localPoint.x));
-        const clampedY = Math.max(-height / 2 + 0.3, Math.min(height / 2 - 0.3, localPoint.y));
+
+        const margin = 0.1; // минимальный отступ от края
+        const clampedX = Math.max(-wallWidth / 2 + margin, Math.min(wallWidth / 2 - margin, localPoint.x));
+        const clampedY = Math.max(-wallHeight / 2 + margin, Math.min(wallHeight / 2 - margin, localPoint.y));
+
         onWallClick?.(wallId, { x: clampedX, y: clampedY });
-      }
-    } else if (activeTool === 'partition' && onPartitionCreateOnWall) {
-      e.stopPropagation();
-      if (e.point) {
-        onPartitionCreateOnWall(wallId, e.point.x, e.point.z);
       }
     }
   };
 
-  const walls = React.useMemo(() => getWallsData(width, height, depth), [width, height, depth]);
-
   return (
     <group>
+      {/* Пол */}
       <mesh
         rotation={[-Math.PI / 2, 0, 0] as [number, number, number]}
         position={[0, 0, 0]}
@@ -74,8 +82,6 @@ export const Room: React.FC<RoomProps> = React.memo(({
           e.stopPropagation();
           if (activeTool === 'furniture' && onFloorClick) {
             onFloorClick({ x: e.point.x, z: e.point.z });
-          } else if (activeTool === 'partition' && onFloorClick) {
-            onFloorClick({ x: e.point.x, z: e.point.z });
           }
         }}
       >
@@ -83,6 +89,7 @@ export const Room: React.FC<RoomProps> = React.memo(({
         <meshStandardMaterial color={colors.floor} />
       </mesh>
 
+      {/* Стены */}
       {walls.map((wall) => (
         <WallWithOpenings
           key={wall.id}
@@ -102,24 +109,7 @@ export const Room: React.FC<RoomProps> = React.memo(({
         />
       ))}
 
-      {partitions?.map(p => (
-        <PartitionModel
-          key={p.id}
-          partition={p}
-          color={p.color || colors.walls}
-          onClick={(e) => {
-            e.stopPropagation();
-            onPartitionClick?.(p);
-          }}
-          onOpeningClick={(opId) => onPartitionOpeningClick?.(p.id, opId)}
-          onWallClick={(partitionId, point) => {
-            if (activeTool === 'window' || activeTool === 'door') {
-              onWallClick?.(partitionId, { x: point.x, y: point.y });
-            }
-          }}
-        />
-      ))}
-
+      {/* Мебель */}
       {furnitureItems?.map(item => (
         <FurnitureModel
           key={item.id}
@@ -132,6 +122,7 @@ export const Room: React.FC<RoomProps> = React.memo(({
         />
       ))}
 
+      {/* Потолок */}
       <mesh rotation={[Math.PI / 2, 0, 0] as [number, number, number]} position={[0, height, 0]} receiveShadow castShadow={false}>
         <planeGeometry args={[width, depth]} />
         <meshStandardMaterial color={colors.ceiling} />

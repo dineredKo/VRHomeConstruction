@@ -1,61 +1,42 @@
+/**
+ * Саги редактора 3D-сцены.
+ * Обрабатывают создание проёмов (окон/дверей) с автоматическим определением типа и позиции.
+ * @module editor-3d/saga
+ */
+
 import { put, takeEvery, select } from 'typed-redux-saga';
 import { actions } from './slice';
 import { selectors } from './selectors';
 import { Opening } from './types';
 
+/**
+ * Обрабатывает запрос на создание проёма.
+ * Определяет тип проёма (окно/дверь) на основе активного инструмента,
+ * устанавливает размеры по умолчанию и добавляет проём к указанной стене.
+ * @param action - экшен createOpeningRequested
+ */
 function* handleCreateOpeningSaga(action: ReturnType<typeof actions.createOpeningRequested>) {
   const { wallId, point } = action.payload;
   const activeTool = yield* select(selectors.selectActiveTool);
   const type = activeTool === 'window' ? 'window' : 'door';
+
+  const width = 0.8;
+  const height = type === 'door' ? 2.1 : 1.2;
 
   const opening: Opening = {
     id: `${type}_${Date.now()}`,
     wallId,
     type,
     position: [point.x, point.y],
-    width: 0.8,
-    height: type === 'door' ? 2.1 : 1.2,
+    width,
+    height,
   };
 
-  const partitions = yield* select(selectors.selectPartitions);
-  const isPartition = partitions.some(p => p.id === wallId);
-
-  if (isPartition) {
-    yield put(actions.addOpeningToPartition({ partitionId: wallId, opening }));
-  } else {
-    yield put(actions.addOpening({ wallId, opening }));
-  }
-
+  yield put(actions.addOpening({ wallId, opening }));
   yield put(actions.setActiveTool('select'));
 }
 
-function* handleDeleteOpeningSaga(action: ReturnType<typeof actions.deleteOpeningRequested>) {
-  const { openingId } = action.payload;
-  const openings = yield* select(selectors.selectOpenings);
-  const partitions = yield* select(selectors.selectPartitions);
-
-  let found = false;
-  for (const key in openings) {
-    if (openings[key].some((o: Opening) => o.id === openingId)) {
-      yield put(actions.removeOpening({ wallId: key, openingId }));
-      found = true;
-      break;
-    }
-  }
-
-  if (!found) {
-    for (const p of partitions) {
-      if (p.openings.some(o => o.id === openingId)) {
-        yield put(actions.removeOpeningFromPartition({ partitionId: p.id, openingId }));
-        break;
-      }
-    }
-  }
-
-  yield put(actions.setSelectedOpening(null));
-}
-
+/** Корневая сага редактора */
 export function* initSaga() {
   yield takeEvery(actions.createOpeningRequested.type, handleCreateOpeningSaga);
-  yield takeEvery(actions.deleteOpeningRequested.type, handleDeleteOpeningSaga);
 }

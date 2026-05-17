@@ -1,4 +1,10 @@
-import { Link, NavLink } from 'react-router-dom';
+/**
+ * Страница "Папки".
+ * @module pages/package/ui/PackagesPage
+ */
+
+import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { UniversalButtonFeature } from '@/features/universal-button';
 import { SearchBar } from '@/features/search/ui/SearchBar';
 import { FoldersGrid } from '@/widgets/FoldersGrid';
@@ -17,13 +23,11 @@ export const PackagesPage = () => {
           <UniversalButtonFeature.ui.UniversalButton />
         </div>
       </div>
-
       <div className={styles.searchRow}>
         <div className={styles.searchBarWrapper}>
           <SearchBar scope="global" />
         </div>
       </div>
-
       <FoldersGrid />
     </div>
   );

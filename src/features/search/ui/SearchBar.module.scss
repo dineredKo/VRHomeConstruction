@@ -2,9 +2,9 @@
   display: flex;
   align-items: center;
   position: relative;
-  border-radius: 8px;
+  border-radius: 20px;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 -2px 6px rgba(223, 223, 223, 0.5);
   padding: 0.5rem 1rem;
 
   input {
@@ -12,21 +12,23 @@
     border: none;
     outline: none;
     font-size: 0.9rem;
-    color: #333;
+    color: #818491;              
     &::placeholder {
-      color: #999;
+      color: #818491;             
     }
   }
 
   .searchIcon {
     margin-right: 0.75rem;
-    color: #999;
+    width: 18px;
+    height: 18px;
+             
   }
 
   .clearSearch {
     background: none;
     border: none;
-    color: #999;
+    color: #818491;
     font-size: 1.2rem;
     cursor: pointer;
     opacity: 0.7;

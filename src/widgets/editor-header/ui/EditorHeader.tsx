@@ -1,3 +1,9 @@
+/**
+ * Верхняя панель редактора.
+ * Отображает название проекта, кнопки действий и переключатели режимов просмотра.
+ * @module widgets/editor-header/ui/EditorHeader
+ */
+
 import React from 'react';
 import styles from './EditorHeader.module.scss';
 import type { ViewMode } from '@/features/editor-3d/types';

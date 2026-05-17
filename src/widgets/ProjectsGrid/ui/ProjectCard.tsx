@@ -1,7 +1,13 @@
+/**
+ * Карточка проекта.
+ * @module widgets/ProjectsGrid/ui/ProjectCard
+ */
+
 import React from 'react';
 import { Project } from '@/features/create-project/types';
 import classNames from 'classnames';
 import styles from './ProjectCard.module.scss';
+import OptionsIcon from '@/shared/ui/icons/options.svg'
 
 interface ProjectCardProps {
   project: Project;
@@ -40,7 +46,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             onMenuToggle(project.id);
           }}
         >
-          ⋮
+          <OptionsIcon className={styles.menuIcon} />
         </button>
       </div>
     </div>

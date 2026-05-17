@@ -7,6 +7,7 @@
   z-index: 99;
 }
 
+.projectMenu,
 .folderMenu {
   position: absolute;
   top: 100%;
@@ -18,7 +19,7 @@
   min-width: 200px;
   z-index: 100;
   margin-top: 0.5rem;
-  
+
   .menuItem {
     display: block;
     width: 100%;
@@ -28,25 +29,24 @@
     text-align: left;
     cursor: pointer;
     font-size: 0.9rem;
-    color: #333;
+    color: #353A4F;
     transition: background-color 0.2s;
-    
+
     &:hover {
       background-color: #f5f5f5;
     }
-    
+
     &:first-child {
-      color: #dc3545;
-      
+      color: #353A4F; 
       &:hover {
         background-color: #fff5f5;
       }
     }
   }
-  
+
   .folderDropdown {
     position: relative;
-    
+
     .folderList {
       position: absolute;
       top: 0;
@@ -60,11 +60,11 @@
       margin-left: 0.5rem;
       display: none;
     }
-    
+
     &:hover .folderList {
       display: block;
     }
-    
+
     .folderOption {
       display: block;
       width: 100%;
@@ -74,14 +74,14 @@
       text-align: left;
       cursor: pointer;
       font-size: 0.85rem;
-      color: #333;
+      color: #353A4F;
       transition: background-color 0.2s;
-      
+
       &:hover {
         background-color: #f5f5f5;
       }
     }
-    
+
     .noFolders {
       padding: 0.5rem 1rem;
       font-size: 0.85rem;
@@ -89,4 +89,12 @@
       text-align: center;
     }
   }
+}
+
+.menuIcon {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  vertical-align: middle;
+  color: currentColor;
 }

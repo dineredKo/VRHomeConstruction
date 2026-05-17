@@ -1,3 +1,8 @@
+/**
+ * Сетка папок на странице "Папки".
+ * @module widgets/FoldersGrid/ui/FoldersGrid
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { foldersSelectors, foldersActions } from '@/features/folders';
@@ -39,11 +44,6 @@ export const FoldersGrid = () => {
 
   const handleRemoveFolder = (folderId: string) => {
     dispatch(foldersActions.removeFolder(folderId));
-    folders.forEach(f => {
-      if (f.childFolderIds.includes(folderId)) {
-        dispatch(foldersActions.removeFolderFromFolder({ parentFolderId: f.id, childFolderId: folderId }));
-      }
-    });
     setActiveMenuId(null);
   };
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SearchFeature } from '@/features/search';
+import SearchIcon from '@/shared/ui/icons/search.svg';
 import styles from './SearchBar.module.scss';
 
 interface SearchBarProps {
@@ -30,9 +31,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({ scope = 'global' }) => {
 
   return (
     <div className={styles.searchBar}>
+      <SearchIcon className={styles.searchIcon} />
       <input
         type="text"
-        placeholder={scope === 'global' ? 'Поиск...' : `Поиск по ${scope === 'projects' ? 'проектам' : scope === 'folders' ? 'папкам' : 'макетам'}...`}
+        placeholder={scope === 'global' ? 'Поиск' : `Поиск по ${scope === 'projects' ? 'проектам' : scope === 'folders' ? 'папкам' : 'макетам'}...`}
         className={styles.searchInput}
         value={inputValue}
         onChange={handleChange}
