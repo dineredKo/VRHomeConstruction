@@ -1,0 +1,19 @@
+.empty {
+  padding: 0.5rem 1rem;
+  color: #999;
+}
+
+.option {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9rem;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}

@@ -1,0 +1,20 @@
+.createCard {
+  background-color: white;
+  border-radius: 16px;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  .plusIcon {
+    font-size: 3rem;
+    color: #666;
+    font-weight: 300;
+  }
+}

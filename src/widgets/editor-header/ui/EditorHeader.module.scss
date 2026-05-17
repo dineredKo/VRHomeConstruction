@@ -1,0 +1,73 @@
+.header {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  background: #ffffff;
+  border-bottom: 1px solid #ddd;
+  padding: 0 16px;
+  gap: 16px;
+}
+
+.projectName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.actionBtn {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  &:hover {
+    background: #f5f5f5;
+  }
+}
+
+.viewModes {
+  display: flex;
+  background: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.viewBtn {
+  padding: 6px 16px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: 0.2s;
+
+  &.active {
+    background: #fff;
+    color: #333;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  &:hover:not(.active) {
+    background: #e0e0e0;
+  }
+}
+
+.wallSelect {
+  margin-left: 12px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+}

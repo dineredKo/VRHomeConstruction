@@ -1,0 +1,89 @@
+.page {
+  padding: 2rem;
+}
+
+.navRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  .nav {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
+  }
+
+  .navItem {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: transparent;
+    transition: all 0.2s;
+    &:hover {
+      background: #f5f5f5;
+      color: #667EEA;
+    }
+    &.active {
+      background: #667EEA;
+      color: white;
+    }
+  }
+
+  .addButton {
+    flex: 0 0 auto;
+  }
+}
+
+.searchRow {
+  margin-bottom: 1.5rem;
+  display: flex;
+}
+
+.searchBarWrapper {
+  width: 40%; /* Вот здесь — 40% */
+  max-width: 400px;
+}
+
+.searchBarWrapper .searchBar {
+  width: 100%;
+  height: 36px;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  padding: 0 1rem;
+
+  input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 0.9rem;
+    color: #333;
+    &::placeholder {
+      color: #999;
+    }
+  }
+
+  .clearSearch {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.7;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.layoutsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}

@@ -1,0 +1,1 @@
+export { FoldersGrid } from './ui/FoldersGrid';

@@ -1,0 +1,1 @@
+export { EditorPropertiesPanel } from './ui/EditorPropertiesPanel';

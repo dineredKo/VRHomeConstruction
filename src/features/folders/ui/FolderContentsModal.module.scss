@@ -1,0 +1,51 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  min-width: 300px;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.title {
+  margin-bottom: 16px;
+}
+
+.section {
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  font-weight: bold;
+}
+
+.list {
+  margin-left: 8px;
+}
+
+.listItem {
+  margin-bottom: 4px;
+}
+
+.emptyText {
+  color: #999;
+}
+
+.closeButton {
+  margin-top: 16px;
+  padding: 8px 16px;
+}
