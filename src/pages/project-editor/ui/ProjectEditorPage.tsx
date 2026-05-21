@@ -1,10 +1,4 @@
-/**
- * Страница редактора проекта.
- * Собирает все виджеты редактора: хедер, сайдбар, сцену, панели свойств и модалки.
- * @module pages/project-editor/ui/ProjectEditorPage
- */
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { CreateProjectFeature } from '@/features/create-project';
@@ -21,6 +15,12 @@ import type { Project } from '@/features/create-project/types';
 import type { RootState } from '@/app/store';
 import styles from './ProjectEditorPage.module.scss';
 
+/**
+ * Страница редактора проекта.
+ * Загружает данные проекта при монтировании, сбрасывает при уходе,
+ * и автоматически сохраняет изменения на бэкенд с задержкой 2 секунды.
+ * @module pages/project-editor/ui/ProjectEditorPage
+ */
 export const ProjectEditorPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const project = useSelector((state: RootState) =>
@@ -30,6 +30,60 @@ export const ProjectEditorPage = () => {
   const editor = useEditor();
   const furniture = useFurniture();
   const [showLighting, setShowLighting] = useState(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ======= АВТОСОХРАНЕНИЕ =======
+  // Собираем текущее состояние редактора
+  const roomData = {
+    dimensions: editor.dimensions,
+    colors: editor.colors,
+    light: editor.light,
+    viewMode: editor.viewMode,
+    activeTool: editor.activeTool,
+    openings: editor.openings,
+    partitions: editor.partitions,
+    partitionColors: editor.partitionColors,
+    viewedWallId: editor.viewedWallId,
+    furnitureItems: furniture.items,
+  };
+
+  useEffect(() => {
+    if (!project) return;
+
+    // Сбрасываем предыдущий таймер
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+
+    // Ставим новый таймер на 2 секунды
+    saveTimer.current = setTimeout(() => {
+      // Отправляем PUT /api/projects/:id
+      fetch(`/api/projects/${project.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomData }),
+      }).catch(console.error);
+    }, 2000);
+
+    // Очистка таймера при размонтировании
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [roomData, project]);
+
+  // ======= ЗАГРУЗКА ДАННЫХ ПРИ СМЕНЕ ПРОЕКТА =======
+  useEffect(() => {
+    if (project?.roomData) {
+      editor.loadProjectData(project.roomData);
+      furniture.loadFurniture(project.roomData.furnitureItems ?? []);
+    } else {
+      editor.resetEditor();
+      furniture.resetFurniture();
+    }
+
+    return () => {
+      editor.resetEditor();
+      furniture.resetFurniture();
+    };
+  }, [project?.id]);
 
   if (!project) return <div className={styles.error}>Проект не найден</div>;
 

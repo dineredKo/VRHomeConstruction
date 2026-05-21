@@ -1,9 +1,4 @@
-/**
- * Автоматически сгенерированный список моделей.
- * Обновляется скриптом generate-model-list.cjs при старте dev-сервера.
- * @module furniture/modelList
- */
-
+// Автоматически сгенерировано. Не редактировать вручную.
 export const modelPaths: string[] = [
   "/models/bed.glb",
   "/models/chair.glb",
@@ -14,11 +9,6 @@ export const modelPaths: string[] = [
   "/models/wood-crate/untitled.gltf"
 ];
 
-/**
- * Извлекает имя модели из пути файла.
- * @param path - путь к файлу модели
- * @returns имя модели без расширения
- */
 export const getModelName = (path: string) => {
   const fileName = path.split('/').pop() || '';
   return fileName.replace(/.(glb|gltf)$/, '');

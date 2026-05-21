@@ -9,6 +9,8 @@ import { Html } from '@react-three/drei';
 import { DoubleSide } from 'three';
 import type { Opening } from '../types';
 
+import GearIcon from '@/shared/ui/icons/gear.svg'
+
 interface WallWithOpeningsProps {
   position: [number, number, number];
   rotation: [number, number, number];
@@ -121,7 +123,7 @@ export const WallWithOpenings: React.FC<WallWithOpeningsProps> = React.memo(({
               }}
               title="Редактировать"
             >
-              ⚙
+              <GearIcon/>
             </div>
           </Html>
         ))}

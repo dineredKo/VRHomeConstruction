@@ -1,16 +1,14 @@
-/**
- * Хук useFurniture.
- * Предоставляет доступ к состоянию мебели и действиям по её управлению.
- * @module shared/lib/hooks/useFurniture
- */
-
 import { useSelector, useDispatch } from 'react-redux';
 import { useCallback } from 'react';
 import { actions } from '@/features/furniture/slice';
 import { selectors } from '@/features/furniture/selectors';
 import { getModelName } from '@/shared/utils/getModelName';
 import type { FurnitureItem } from '@/features/furniture/types';
-
+/**
+ * Хук useFurniture.
+ * Предоставляет доступ к состоянию мебели и действиям по её управлению, включая загрузку данных проекта и сброс.
+ * @module shared/lib/hooks/useFurniture
+ */
 export function useFurniture() {
   const dispatch = useDispatch();
 
@@ -70,6 +68,16 @@ export function useFurniture() {
     }));
   }, [dispatch]);
 
+  /** Загрузить список мебели из данных проекта */
+  const loadFurniture = useCallback((items: FurnitureItem[]) => {
+    dispatch(actions.loadFurniture(items));
+  }, [dispatch]);
+
+  /** Сбросить мебель */
+  const resetFurniture = useCallback(() => {
+    dispatch(actions.resetFurniture());
+  }, [dispatch]);
+
   return {
     items,
     selectedFurniture,
@@ -82,5 +90,7 @@ export function useFurniture() {
     deleteFurniture,
     closeModal,
     onReady,
+    loadFurniture,
+    resetFurniture,
   };
 }

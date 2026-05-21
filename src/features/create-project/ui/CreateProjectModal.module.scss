@@ -129,3 +129,42 @@
     cursor: not-allowed;
   }
 }
+
+.warning {
+  background: #fff3cd;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  text-align: center;
+
+  p {
+    margin-bottom: 8px;
+    color: #856404;
+  }
+}
+
+.warningButtons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.authBtn,
+.continueBtn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.authBtn {
+  background: #3B00FF;
+  color: white;
+}
+
+.continueBtn {
+  background: #6c757d;
+  color: white;
+}

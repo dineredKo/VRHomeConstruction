@@ -1,15 +1,13 @@
-/**
- * Страница "Макеты".
- * @module pages/layout/ui/LayoutsPage
- */
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { UniversalButtonFeature } from '@/features/universal-button';
 import { SearchBar } from '@/features/search/ui/SearchBar';
 import { LayoutsGrid } from '@/widgets/LayoutsGrid';
 import styles from './LayoutsPage.module.scss';
-
+/**
+ * Страница "Макеты".
+ * @module pages/layout/ui/LayoutsPage
+ */
 export const LayoutsPage = () => {
   return (
     <div className={styles.page}>

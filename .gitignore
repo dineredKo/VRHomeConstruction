@@ -1,4 +1,54 @@
-node_modules
+node_modules/
 dist/
 build/
 package-lock.json
+
+# Environment
+.env
+.env.*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Logs
+*.log
+
+# Node caches
+.parcel-cache/
+.next/
+.nuxt/
+.vite
+
+# Go
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+coverage.out
+
+# Vendor
+vendor/
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Docker
+docker-compose.override.yml
+
+# Build artifacts
+/*.log
+
+# Sensitive
+secrets.yml
+credentials.json
+
+# Optional: local backend binary
+/backend/server
+

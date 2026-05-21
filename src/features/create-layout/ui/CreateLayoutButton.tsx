@@ -1,13 +1,11 @@
-/**
- * Кнопка для открытия модалки создания макета.
- * @module create-layout/ui/CreateLayoutButton
- */
-
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { ModalsFeature } from '@/features/modals';
 import styles from './CreateLayoutButton.module.scss';
-
+/**
+ * Кнопка для открытия модалки создания макета.
+ * @module create-layout/ui/CreateLayoutButton
+ */
 export const CreateLayoutButton: React.FC = () => {
   const dispatch = useDispatch();
 

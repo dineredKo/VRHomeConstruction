@@ -1,3 +1,9 @@
+/**
+ * Типы и интерфейсы для фичи авторизации пользователя.
+ * @module user/types
+ */
+
+/** Данные авторизованного пользователя */
 export interface User {
   id: string;
   name: string;
@@ -5,9 +11,10 @@ export interface User {
   avatar?: string;
 }
 
-export interface UserState {
-  authData?: User;
-  isAuth: boolean;
+/** Состояние авторизации в Redux */
+export interface AuthState {
+  user: User | null;
+  accessToken: string | null;
   isLoading: boolean;
-  error?: string;
+  error: string | null;
 }

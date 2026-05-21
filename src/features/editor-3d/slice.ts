@@ -19,6 +19,7 @@ const initialState: EditorState = {
   openings: {},
   partitions: [],
   partitionColors: {},
+  furnitureItems: [],
   viewedWallId: 'front',
   selectedOpening: null,
   selectedPartition: null,
@@ -103,6 +104,25 @@ export const { actions, name, reducer } = createSlice({
     /** Удалить цвет перегородки */
     removePartitionColor(state, action: PayloadAction<string>) {
       delete state.partitionColors[action.payload];
+    },
+     /** Загрузить полное состояние редактора из данных проекта */
+    loadProjectData(state, action: PayloadAction<Partial<EditorState>>) {
+      if (action.payload.dimensions) state.dimensions = action.payload.dimensions;
+      if (action.payload.colors) state.colors = action.payload.colors;
+      if (action.payload.light) state.light = action.payload.light;
+      if (action.payload.viewMode) state.viewMode = action.payload.viewMode;
+      if (action.payload.activeTool) state.activeTool = action.payload.activeTool;
+      if (action.payload.openings) state.openings = action.payload.openings;
+      if (action.payload.partitions) state.partitions = action.payload.partitions;
+      if (action.payload.furnitureItems) state.furnitureItems = action.payload.furnitureItems;
+      if (action.payload.partitionColors) state.partitionColors = action.payload.partitionColors;
+      if (action.payload.viewedWallId) state.viewedWallId = action.payload.viewedWallId;
+      if (action.payload.selectedOpening) state.selectedOpening = action.payload.selectedOpening;
+      if (action.payload.selectedPartition) state.selectedPartition = action.payload.selectedPartition;
+    },
+    /** Сбросить редактор в начальное состояние */
+    resetEditor() {
+      return initialState;
     },
   },
 });

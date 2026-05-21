@@ -1,27 +1,26 @@
+/**
+ * Селекторы для авторизации.
+ * @module user/selectors
+ */
+
 import { createSelector } from '@reduxjs/toolkit';
-import { name } from './slice';
-import { UserState } from './types';
+import { name, AuthState } from './slice';
 
-type State = {
-  [name]: UserState;
-};
-
+type State = { [name]: AuthState };
 const root = (state: State) => state[name];
 
-const selectUserAuthData = createSelector(root, (user) => user?.authData);
-const selectUserIsAuth = createSelector(root, (user) => user?.isAuth ?? false);
-const selectUserIsLoading = createSelector(root, (user) => user?.isLoading ?? false);
-const selectUserError = createSelector(root, (user) => user?.error);
-const selectUserName = createSelector(root, (user) => user?.authData?.name);
-const selectUserEmail = createSelector(root, (user) => user?.authData?.email);
-const selectUserAvatar = createSelector(root, (user) => user?.authData?.avatar);
+/** Текущий пользователь */
+export const selectUser = createSelector(root, (state) => state?.user);
+/** Авторизован ли пользователь */
+export const selectIsAuth = createSelector(root, (state) => !!state?.user);
+/** Идёт ли процесс загрузки */
+export const selectAuthLoading = createSelector(root, (state) => state?.isLoading ?? false);
+/** Текущая ошибка авторизации */
+export const selectAuthError = createSelector(root, (state) => state?.error);
 
 export const selectors = {
-  selectUserAuthData,
-  selectUserIsAuth,
-  selectUserIsLoading,
-  selectUserError,
-  selectUserName,
-  selectUserEmail,
-  selectUserAvatar,
+  selectUser,
+  selectIsAuth,
+  selectAuthLoading,
+  selectAuthError,
 };

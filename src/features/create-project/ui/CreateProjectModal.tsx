@@ -1,31 +1,40 @@
-/**
- * Модальное окно создания проекта.
- * Позволяет ввести название и создать проект.
- * @module create-project/ui/CreateProjectModal
- */
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ModalsFeature } from '@/features/modals';
 import { CreateProjectFeature } from '../index';
+import { useAuth } from '@/shared/lib/hooks/useAuth';
 import styles from './CreateProjectModal.module.scss';
+
+/**
+ * Модальное окно создания проекта.
+ * Позволяет ввести название и создать проект.
+ * Если пользователь не авторизован, выводит предупреждение.
+ * @module create-project/ui/CreateProjectModal
+ */
 
 export const CreateProjectModal = () => {
   const dispatch = useDispatch();
+  const { isAuth } = useAuth();
 
   const isModalOpen = useSelector(ModalsFeature.selectors.selectIsCreateProjectModalOpen);
   const projectName = useSelector(CreateProjectFeature.selectors.selectProjectName);
   const isLoading = useSelector(CreateProjectFeature.selectors.selectIsLoading);
   const error = useSelector(CreateProjectFeature.selectors.selectError);
 
+  const [showAuthWarning, setShowAuthWarning] = useState(false);
+
   if (!isModalOpen) return null;
 
   const handleCreateProject = () => {
-    if (projectName.trim()) {
-      dispatch(CreateProjectFeature.actions.createProjectRequested());
-    } else {
+    if (!projectName.trim()) {
       dispatch(CreateProjectFeature.actions.setError('Введите название проекта'));
+      return;
     }
+    if (!isAuth) {
+      setShowAuthWarning(true);
+      return;
+    }
+    dispatch(CreateProjectFeature.actions.createProjectRequested());
   };
 
   const handleClose = () => {
@@ -47,6 +56,32 @@ export const CreateProjectModal = () => {
         </div>
         <div className={styles.content}>
           {error && <div className={styles.error}>{error}</div>}
+
+          {showAuthWarning && (
+            <div className={styles.warning}>
+              <p>⚠️ Вы не вошли в аккаунт. Проект не будет сохранён.</p>
+              <div className={styles.warningButtons}>
+                <button
+                  className={styles.authBtn}
+                  onClick={() => {
+                    setShowAuthWarning(false);
+                  }}
+                >
+                  Войти
+                </button>
+                <button
+                  className={styles.continueBtn}
+                  onClick={() => {
+                    setShowAuthWarning(false);
+                    dispatch(CreateProjectFeature.actions.createProjectRequested());
+                  }}
+                >
+                  Продолжить без сохранения
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className={styles.nameStep}>
             <label className={styles.label}>Введите название проекта</label>
             <input

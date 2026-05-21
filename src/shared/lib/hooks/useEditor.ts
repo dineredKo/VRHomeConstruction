@@ -1,17 +1,15 @@
-/**
- * Хук useEditor.
- * Предоставляет доступ ко всем состояниям и действиям редактора 3D-сцены.
- * @module shared/lib/hooks/useEditor
- */
-
 import { useSelector, useDispatch } from 'react-redux';
 import { useCallback } from 'react';
 import { actions } from '@/features/editor-3d/slice';
 import { selectors } from '@/features/editor-3d/selectors';
 import { WALL_THICKNESS } from '@/features/editor-3d/constants';
 import type { RoomDimensions } from '@/features/editor-3d/ui/EditorScene';
-import type { RoomColors, ViewMode, Tool, Opening, Partition, LightConfig } from '@/features/editor-3d/types';
-
+import type { RoomColors, ViewMode, Tool, Opening, Partition, LightConfig, EditorState } from '@/features/editor-3d/types';
+/**
+ * Хук useEditor.
+ * Предоставляет доступ ко всем состояниям и действиям редактора 3D-сцены, включая загрузку данных проекта и сброс.
+ * @module shared/lib/hooks/useEditor
+ */
 export function useEditor() {
   const dispatch = useDispatch();
 
@@ -25,6 +23,7 @@ export function useEditor() {
   const selectedOpening = useSelector(selectors.selectSelectedOpening);
   const partitions = useSelector(selectors.selectPartitions);
   const selectedPartition = useSelector(selectors.selectSelectedPartition);
+  const partitionColors = useSelector(selectors.selectPartitionColors);
 
   /** Установить размеры комнаты */
   const setDimensions = useCallback((dims: RoomDimensions) => dispatch(actions.setDimensions(dims)), [dispatch]);
@@ -146,6 +145,16 @@ export function useEditor() {
     dispatch(actions.removeOpeningFromPartition({ partitionId, openingId }));
   }, [dispatch]);
 
+  /** Загрузить состояние редактора из данных проекта */
+  const loadProjectData = useCallback((data: Partial<EditorState>) => {
+    dispatch(actions.loadProjectData(data));
+  }, [dispatch]);
+
+  /** Сбросить редактор в начальное состояние */
+  const resetEditor = useCallback(() => {
+    dispatch(actions.resetEditor());
+  }, [dispatch]);
+
   return {
     dimensions,
     colors,
@@ -156,6 +165,7 @@ export function useEditor() {
     viewedWallId,
     selectedOpening,
     partitions,
+    partitionColors,
     selectedPartition,
     setDimensions,
     setColors,
@@ -175,5 +185,7 @@ export function useEditor() {
     clearSelectedPartition,
     addOpeningToPartition,
     removeOpeningFromPartition,
+    loadProjectData,
+    resetEditor,
   };
 }

@@ -1,9 +1,3 @@
-/**
- * Контекстное меню для проекта.
- * Позволяет удалить проект, добавить в папку или присвоить тег.
- * @module project-menu/ui/ProjectMenu
- */
-
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { foldersActions } from '@/features/folders';
@@ -18,7 +12,11 @@ interface ProjectMenuProps {
   onClose: () => void;
   onRemove: () => void;
 }
-
+/**
+ * Контекстное меню для проекта.
+ * Позволяет удалить проект, добавить в папку или присвоить тег.
+ * @module project-menu/ui/ProjectMenu
+ */
 export const ProjectMenu: React.FC<ProjectMenuProps> = ({ projectId, onClose, onRemove }) => {
   const dispatch = useDispatch();
 

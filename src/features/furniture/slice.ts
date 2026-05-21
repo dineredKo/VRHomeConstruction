@@ -1,6 +1,6 @@
 /**
  * Redux Slice для управления мебелью.
- * Содержит редюсеры для добавления, обновления, удаления и выбора мебели.
+ * Содержит редюсеры для добавления, обновления, удаления, выбора мебели, а также загрузки данных проекта и сброса.
  * @module furniture/slice
  */
 
@@ -75,6 +75,16 @@ export const { actions, name, reducer } = createSlice({
           state.selectedFurniture = { ...item };
         }
       }
+    },
+    /** Загрузить список мебели из данных проекта */
+    loadFurniture(state, action: PayloadAction<FurnitureItem[]>) {
+      state.items = action.payload;
+    },
+    /** Сбросить мебель в начальное состояние */
+    resetFurniture(state) {
+      state.items = [];
+      state.selectedFurniture = null;
+      state.showFurnitureModal = false;
     },
   },
 });

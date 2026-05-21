@@ -1,15 +1,13 @@
-/**
- * Страница "Папки".
- * @module pages/package/ui/PackagesPage
- */
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { UniversalButtonFeature } from '@/features/universal-button';
 import { SearchBar } from '@/features/search/ui/SearchBar';
 import { FoldersGrid } from '@/widgets/FoldersGrid';
 import styles from './PackagesPage.module.scss';
-
+/**
+ * Страница "Папки".
+ * @module pages/package/ui/PackagesPage
+ */
 export const PackagesPage = () => {
   return (
     <div className={styles.page}>
