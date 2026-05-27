@@ -1,65 +1,43 @@
-/**
- * Саги для создания макетов.
- * @module create-layout/saga
- */
-
-import { takeLatest, put, select, all, delay } from 'typed-redux-saga';
+import { takeLatest, put, select, all, call } from 'typed-redux-saga';
 import { ModalsFeature } from '@/features/modals';
-import { SearchFeature } from '@/features/search';
-import { actions, name } from './slice';
+import { actions } from './slice';
 import { selectors } from './selectors';
+import { layoutsApi } from '@/app/api';
 
 function* handleCreateLayout() {
   try {
-    const layoutName: string = yield* select(selectors.selectLayoutName);
+    const layoutName = yield* select(selectors.selectLayoutName);
     const trimmedName = layoutName.trim();
     if (!trimmedName) {
       throw new Error('Введите название макета');
     }
-    yield put(actions.setIsLoading(true));
-    yield put(actions.setError(null));
-    yield delay(1000);
+    yield* put(actions.setIsLoading(true));
+    yield* put(actions.setError(null));
 
-    yield put(actions.addLayout({
-      id: `layout_${Date.now()}`,
-      name: trimmedName,
-    }));
+    const layout = yield* call(layoutsApi.createLayout, trimmedName);
 
-    yield put(actions.resetForm());
-    yield put(ModalsFeature.actions.closeCreateLayoutModal());
+    yield* put(actions.addLayout(layout));
+    yield* put(actions.resetForm());
+    yield* put(ModalsFeature.actions.closeCreateLayoutModal());
   } catch (error: any) {
     const errorMessage = error.message || 'Ошибка при создании макета';
-    yield put(actions.setError(errorMessage));
+    yield* put(actions.setError(errorMessage));
   } finally {
-    yield put(actions.setIsLoading(false));
+    yield* put(actions.setIsLoading(false));
   }
 }
 
-function* handleSearchLayouts() {
+function* handleDeleteLayout(action: ReturnType<typeof actions.removeLayout>) {
   try {
-    const searchQuery = yield* select(SearchFeature.selectors.selectSearchQuery);
-    if (!searchQuery.trim()) {
-      yield put(SearchFeature.actions.setHighlightedIds([]));
-      return;
-    }
-    
-    const layouts = yield* select(selectors.selectLayouts);
-    const found = layouts.filter((l: any) =>
-      l.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    const foundIds = found.map((l: any) => l.id);
-    
-    yield put(SearchFeature.actions.setHighlightedIds(foundIds));
-    if (foundIds.length > 0) {
-      yield put(SearchFeature.actions.setSearchResults(foundIds));
-    }
+    yield* call(layoutsApi.deleteLayout, action.payload);
   } catch (error: any) {
-    console.error('Search layouts error:', error);
+    console.error('Delete layout error:', error);
   }
 }
 
 export function* initSaga() {
   yield all([
     takeLatest(actions.createLayoutRequested.type, handleCreateLayout),
+    takeLatest(actions.removeLayout.type, handleDeleteLayout),
   ]);
 }

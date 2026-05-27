@@ -1,42 +1,32 @@
-/**
- * Саги для создания папок.
- * Обрабатывают создание папки и добавляют её в общее хранилище.
- * @module create-folder/saga
- */
-
-import { takeLatest, put, select, all } from 'typed-redux-saga';
+import { takeLatest, put, select, all, call } from 'typed-redux-saga';
 import { ModalsFeature } from '@/features/modals';
 import { foldersActions } from '@/features/folders';
 import { actions } from './slice';
 import { selectors } from './selectors';
+import { foldersApi } from '@/app/api';
 
-/** Сага создания папки: валидирует, добавляет папку через foldersActions */
 function* handleCreateFolder() {
   try {
-    const folderName: string = yield* select(selectors.selectFolderName);
+    const folderName = yield* select(selectors.selectFolderName);
     const trimmedName = folderName.trim();
 
     if (!trimmedName) {
       throw new Error('Введите название папки');
     }
 
-    yield put(actions.setIsLoading(true));
-    yield put(actions.setError(null));
+    yield* put(actions.setIsLoading(true));
+    yield* put(actions.setError(null));
 
-    yield put(foldersActions.addFolder({
-      id: `folder_${Date.now()}`,
-      name: trimmedName,
-      description: '',
-      parentId: null,
-    }));
+    const folder = yield* call(foldersApi.createFolder, trimmedName, null);
 
-    yield put(actions.resetForm());
-    yield put(ModalsFeature.actions.closeCreateFolderModal());
+    yield* put(foldersActions.addFolder(folder));
+    yield* put(actions.resetForm());
+    yield* put(ModalsFeature.actions.closeCreateFolderModal());
   } catch (error: any) {
     const errorMessage = error.message || 'Ошибка при создании папки';
-    yield put(actions.setError(errorMessage));
+    yield* put(actions.setError(errorMessage));
   } finally {
-    yield put(actions.setIsLoading(false));
+    yield* put(actions.setIsLoading(false));
   }
 }
 

@@ -1,138 +1,181 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/shared/lib/hooks/useAuth';
-import { userActions } from '@/features/user';
-import { useDispatch } from 'react-redux';
-
-interface AuthModalProps {
-  onClose: () => void;
-}
 /**
- * Модальное окно аутентификации (вход / регистрация).
- * После успешного входа показывает профиль пользователя и кнопку "Выйти".
- * Ошибка авторизации сбрасывается при закрытии или переключении режимов.
+ * Модальное окно входа и регистрации с подтверждением по коду из email.
  * @module user/ui/AuthModal
  */
-export const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
+
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { UserFeature } from '../index';
+import type { AuthForm } from '../types';
+import styles from './AuthModal.module.scss';
+
+export const AuthModal = () => {
   const dispatch = useDispatch();
-  const { isAuth, user, login, register, logout, isLoading, error } = useAuth();
-  const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
 
-  /**
-   * Сбрасываем ошибку при размонтировании компонента.
-   */
-  useEffect(() => {
-    return () => {
-      dispatch(userActions.authFailure(null));
-    };
-  }, [dispatch]);
+  const isOpen = useSelector(UserFeature.selectors.selectIsAuthModalOpen);
+  const mode = useSelector(UserFeature.selectors.selectAuthMode);
+  const step = useSelector(UserFeature.selectors.selectAuthStep);
+  const codeSent = useSelector(UserFeature.selectors.selectCodeSent);
+  const form = useSelector(UserFeature.selectors.selectAuthForm);
+  const isLoading = useSelector(UserFeature.selectors.selectUserIsLoading);
+  const error = useSelector(UserFeature.selectors.selectUserError);
+  const successMessage = useSelector(UserFeature.selectors.selectSuccessMessage);
 
-  /**
-   * Сбрасываем ошибку при переключении режима (вход / регистрация).
-   */
-  const handleModeSwitch = () => {
-    setMode(mode === 'login' ? 'register' : 'login');
-    dispatch(userActions.authFailure(null));
-  };
+  if (!isOpen) {
+    return null;
+  }
 
-  /**
-   * Закрываем модалку и сбрасываем ошибку.
-   */
+  const isRegister = mode === 'register';
+  const isCodeStep = step === 'code';
+  const title = isRegister ? 'Регистрация' : 'Вход';
+
+  const submitLabel = isLoading
+    ? isCodeStep
+      ? 'Проверка...'
+      : 'Отправка...'
+    : isCodeStep
+      ? 'Подтвердить и войти'
+      : 'Получить код на email';
+
   const handleClose = () => {
-    dispatch(userActions.authFailure(null));
-    onClose();
+    dispatch(UserFeature.actions.closeAuthModal());
   };
 
-  /**
-   * Отправляем форму входа или регистрации.
-   */
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (mode === 'login') {
-      login(email, password);
+  const handleSubmit = () => {
+    if (isCodeStep) {
+      dispatch(UserFeature.actions.verifyCodeRequested());
     } else {
-      register(name, email, password);
+      dispatch(UserFeature.actions.sendCodeRequested());
     }
   };
 
-  // Если пользователь уже авторизован — показываем профиль
-  if (isAuth && user) {
-    return (
-      <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        background: 'rgba(0,0,0,0.5)', display: 'flex',
-        alignItems: 'center', justifyContent: 'center', zIndex: 1000
-      }} onClick={handleClose}>
-        <div style={{
-          background: 'white', borderRadius: 12, padding: 24,
-          minWidth: 300, textAlign: 'center'
-        }} onClick={e => e.stopPropagation()}>
-          <h3>Вход выполнен</h3>
-          <p>{user.name} ({user.email})</p>
-          <button onClick={() => { logout(); handleClose(); }}
-            style={{ marginTop: 12, padding: '8px 16px' }}>
-            Выйти
+  const handleBack = () => {
+    dispatch(UserFeature.actions.setAuthStep('form'));
+    dispatch(UserFeature.actions.setCodeSent(false));
+    dispatch(UserFeature.actions.setFormField({ field: 'code', value: '' }));
+  };
+
+  const handleFieldChange = (field: keyof AuthForm, value: string) => {
+    dispatch(UserFeature.actions.setFormField({ field, value }));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
+  return (
+    <div className={styles.overlay} onClick={handleClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.header}>
+          <h2>{title}</h2>
+        </div>
+        <div className={styles.content}>
+          {error && <div className={styles.error}>{error}</div>}
+          {successMessage && isCodeStep && (
+            <div className={styles.success}>{successMessage}</div>
+          )}
+
+          {isCodeStep ? (
+            <>
+              {codeSent && (
+                <p className={styles.hint}>
+                  Код отправлен на <strong>{form.email}</strong>. Проверьте почту (и папку «Спам»).
+                </p>
+              )}
+              <label className={styles.label}>Код из письма</label>
+              <input
+                type="text"
+                className={styles.input}
+                placeholder="000000"
+                value={form.code}
+                onChange={(e) =>
+                  handleFieldChange('code', e.target.value.replace(/\D/g, '').slice(0, 6))
+                }
+                onKeyDown={handleKeyDown}
+                disabled={isLoading}
+                autoFocus
+                maxLength={6}
+                inputMode="numeric"
+              />
+              <button type="button" className={styles.backLink} onClick={handleBack}>
+                ← Изменить email или пароль
+              </button>
+            </>
+          ) : (
+            <>
+              {isRegister && (
+                <>
+                  <label className={styles.label}>Имя</label>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    placeholder="Ваше имя"
+                    value={form.name}
+                    onChange={(e) => handleFieldChange('name', e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={isLoading}
+                    autoFocus
+                  />
+                </>
+              )}
+              <label className={styles.label}>Email</label>
+              <input
+                type="email"
+                className={styles.input}
+                placeholder="email@example.com"
+                value={form.email}
+                onChange={(e) => handleFieldChange('email', e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={isLoading}
+                autoFocus={!isRegister}
+              />
+              <label className={styles.label}>Пароль</label>
+              <input
+                type="password"
+                className={styles.input}
+                placeholder={isRegister ? 'Минимум 6 символов' : 'Пароль'}
+                value={form.password}
+                onChange={(e) => handleFieldChange('password', e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={isLoading}
+              />
+              <p className={styles.hint}>На email придёт 6-значный код для подтверждения</p>
+              <div className={styles.switchMode}>
+                {isRegister ? (
+                  <>
+                    Уже есть аккаунт?
+                    <button
+                      type="button"
+                      onClick={() => dispatch(UserFeature.actions.setAuthMode('login'))}
+                    >
+                      Войти
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Нет аккаунта?
+                    <button
+                      type="button"
+                      onClick={() => dispatch(UserFeature.actions.setAuthMode('register'))}
+                    >
+                      Зарегистрироваться
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+        <div className={styles.footer}>
+          <button className={styles.cancelBtn} onClick={handleClose} disabled={isLoading}>
+            Отмена
+          </button>
+          <button className={styles.submitBtn} onClick={handleSubmit} disabled={isLoading}>
+            {submitLabel}
           </button>
         </div>
-      </div>
-    );
-  }
-
-  // Форма входа / регистрации
-  return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.5)', display: 'flex',
-      alignItems: 'center', justifyContent: 'center', zIndex: 1000
-    }} onClick={handleClose}>
-      <div style={{
-        background: 'white', borderRadius: 12, padding: 24,
-        minWidth: 320, maxWidth: 400
-      }} onClick={e => e.stopPropagation()}>
-        <h2>{mode === 'login' ? 'Вход' : 'Регистрация'}</h2>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <form onSubmit={handleSubmit}>
-          {mode === 'register' && (
-            <div style={{ marginBottom: 12 }}>
-              <label>Имя</label>
-              <input type="text" value={name}
-                onChange={e => setName(e.target.value)} required
-                style={{ width: '100%', padding: '8px' }} />
-            </div>
-          )}
-          <div style={{ marginBottom: 12 }}>
-            <label>Email</label>
-            <input type="email" value={email}
-              onChange={e => setEmail(e.target.value)} required
-              style={{ width: '100%', padding: '8px' }} />
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <label>Пароль</label>
-            <input type="password" value={password}
-              onChange={e => setPassword(e.target.value)} required
-              style={{ width: '100%', padding: '8px' }} />
-          </div>
-          <button type="submit" disabled={isLoading}
-            style={{
-              width: '100%', padding: '10px',
-              background: '#3B00FF', color: 'white',
-              border: 'none', borderRadius: 6
-            }}>
-            {isLoading ? 'Загрузка...' : mode === 'login' ? 'Войти' : 'Зарегистрироваться'}
-          </button>
-        </form>
-        <p style={{ marginTop: 12, textAlign: 'center' }}>
-          {mode === 'login' ? 'Нет аккаунта? ' : 'Уже есть аккаунт? '}
-          <button onClick={handleModeSwitch}
-            style={{
-              border: 'none', background: 'none',
-              color: '#3B00FF', cursor: 'pointer'
-            }}>
-            {mode === 'login' ? 'Зарегистрироваться' : 'Войти'}
-          </button>
-        </p>
       </div>
     </div>
   );

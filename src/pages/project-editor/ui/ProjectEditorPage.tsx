@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { CreateProjectFeature } from '@/features/create-project';
 import { EditorHeader } from '@/widgets/editor-header';
 import { EditorSidebar } from '@/widgets/editor-sidebar';
@@ -11,18 +11,34 @@ import { FurnitureModal } from '@/features/furniture/ui/FurnitureModal';
 import { LightingModal } from '@/features/editor-3d/ui/LightingModal';
 import { useEditor } from '@/shared/lib/hooks/useEditor';
 import { useFurniture } from '@/shared/lib/hooks/useFurniture';
+import { actions as editorActions } from '@/features/editor-3d/slice';
+import { selectors as editorSelectors } from '@/features/editor-3d/selectors';
+import { selectors as furnitureSelectors } from '@/features/furniture/selectors';
+import { projectsApi } from '@/app/api';
 import type { Project } from '@/features/create-project/types';
 import type { RootState } from '@/app/store';
+import type { Opening, Partition } from '@/features/editor-3d/types';
+import type { FurnitureItem } from '@/features/furniture/types';
 import styles from './ProjectEditorPage.module.scss';
 
-/**
- * Страница редактора проекта.
- * Загружает данные проекта при монтировании, сбрасывает при уходе,
- * и автоматически сохраняет изменения на бэкенд с задержкой 2 секунды.
- * @module pages/project-editor/ui/ProjectEditorPage
- */
+function flattenOpenings(openings: { [wallId: string]: Opening[] }): Opening[] {
+  return Object.entries(openings).flatMap(([wallId, wallOpenings]) =>
+    wallOpenings.map(o => ({ ...o, wallId }))
+  );
+}
+
+function groupOpenings(openings: Opening[]): { [wallId: string]: Opening[] } {
+  const grouped: { [wallId: string]: Opening[] } = {};
+  for (const o of openings) {
+    if (!grouped[o.wallId]) grouped[o.wallId] = [];
+    grouped[o.wallId].push(o);
+  }
+  return grouped;
+}
+
 export const ProjectEditorPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
+  const dispatch = useDispatch();
   const project = useSelector((state: RootState) =>
     CreateProjectFeature.selectors.selectProjects(state).find((p: Project) => p.id === projectId)
   );
@@ -30,61 +46,75 @@ export const ProjectEditorPage = () => {
   const editor = useEditor();
   const furniture = useFurniture();
   const [showLighting, setShowLighting] = useState(false);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // ======= АВТОСОХРАНЕНИЕ =======
-  // Собираем текущее состояние редактора
-  const roomData = {
-    dimensions: editor.dimensions,
-    colors: editor.colors,
-    light: editor.light,
-    viewMode: editor.viewMode,
-    activeTool: editor.activeTool,
-    openings: editor.openings,
-    partitions: editor.partitions,
-    partitionColors: editor.partitionColors,
-    viewedWallId: editor.viewedWallId,
-    furnitureItems: furniture.items,
-  };
+  const fullEditorState = useSelector(editorSelectors.selectEditor);
+  const furnitureItems = useSelector(furnitureSelectors.selectFurnitureItems);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!project) return;
+    if (!projectId) return;
 
-    // Сбрасываем предыдущий таймер
-    if (saveTimer.current) clearTimeout(saveTimer.current);
+    dispatch(editorActions.setCurrentProjectId(projectId));
 
-    // Ставим новый таймер на 2 секунды
-    saveTimer.current = setTimeout(() => {
-      // Отправляем PUT /api/projects/:id
-      fetch(`/api/projects/${project.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomData }),
-      }).catch(console.error);
-    }, 2000);
+    projectsApi.fetchProject(projectId).then(data => {
+      if (data && data.roomData) {
+        const rd = data.roomData;
+        dispatch(editorActions.loadRoomData({
+          dimensions: rd.dimensions || { width: 4, height: 3, depth: 4 },
+          colors: rd.colors || { walls: '#c0b0a0', floor: '#e8e0d0', ceiling: '#ffffff' },
+          light: rd.light || { intensity: 1.2, ambientIntensity: 0.4, color: '#ffffff' },
+          openings: groupOpenings(rd.openings || []),
+          partitions: rd.partitions || [],
+          partitionColors: (rd.partitions || []).reduce((acc: any, p: any) => {
+            if (p.color) acc[p.id] = p.color;
+            return acc;
+          }, {}),
+        }));
+      }
+      setLoading(false);
+    }).catch(err => {
+      console.error('Failed to load project:', err);
+      setLoading(false);
+    });
 
-    // Очистка таймера при размонтировании
     return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
+      dispatch(editorActions.resetEditor());
     };
-  }, [roomData, project]);
+  }, [projectId, dispatch]);
 
-  // ======= ЗАГРУЗКА ДАННЫХ ПРИ СМЕНЕ ПРОЕКТА =======
+  const save = useCallback(() => {
+    if (!projectId || !project) return;
+
+    const roomData = {
+      dimensions: fullEditorState.dimensions,
+      colors: fullEditorState.colors,
+      light: fullEditorState.light,
+      openings: flattenOpenings(fullEditorState.openings),
+      partitions: fullEditorState.partitions.map(p => ({
+        ...p,
+        color: fullEditorState.partitionColors[p.id] || null,
+      })),
+      furniture: furnitureItems,
+    };
+
+    projectsApi.updateProject(projectId, {
+      name: project.name,
+      status: project.status || 'active',
+      roomData,
+    }).catch(err => console.error('Auto-save failed:', err));
+  }, [projectId, project, fullEditorState, furnitureItems]);
+
   useEffect(() => {
-    if (project?.roomData) {
-      editor.loadProjectData(project.roomData);
-      furniture.loadFurniture(project.roomData.furnitureItems ?? []);
-    } else {
-      editor.resetEditor();
-      furniture.resetFurniture();
-    }
-
+    if (loading) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(save, 3000);
     return () => {
-      editor.resetEditor();
-      furniture.resetFurniture();
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [project?.id]);
+  }, [save, loading]);
 
+  if (loading) return <div className={styles.loading}>Загрузка проекта...</div>;
   if (!project) return <div className={styles.error}>Проект не найден</div>;
 
   return (

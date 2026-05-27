@@ -1,18 +1,19 @@
 /**
- * Публичный API фичи user.
- * @module user/index
+ * Публичный API фичи пользователя.
+ * @module user
  */
 
 import { actions, reducer, name } from './slice';
 import { selectors } from './selectors';
 import { initSaga } from './saga';
 
-export const userActions = actions;
-export const userSelectors = selectors;
-
 export const UserFeature = {
   reducer: { [name]: reducer },
   actions,
+  sagas: {
+    init: initSaga,
+  },
   selectors,
-  sagas: { init: initSaga },
 };
+
+export { AuthModal } from './ui/AuthModal';

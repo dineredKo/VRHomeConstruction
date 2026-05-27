@@ -3,8 +3,6 @@
  * @module create-project/types
  */
 
-import type { EditorState } from '@/features/editor-3d/types';
-
 /** Проект */
 export interface Project {
   id: string;
@@ -13,8 +11,6 @@ export interface Project {
   number: number;
   createdAt: string;
   status: 'active' | 'archived';
-  /** Данные редактора 3D-сцены (сохраняются бэкендом) */
-  roomData?: Partial<EditorState>;
 }
 
 /** Состояние формы создания проекта */

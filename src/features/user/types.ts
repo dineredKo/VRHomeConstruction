@@ -1,9 +1,8 @@
 /**
- * Типы и интерфейсы для фичи авторизации пользователя.
+ * Типы фичи пользователя и авторизации.
  * @module user/types
  */
 
-/** Данные авторизованного пользователя */
 export interface User {
   id: string;
   name: string;
@@ -11,10 +10,27 @@ export interface User {
   avatar?: string;
 }
 
-/** Состояние авторизации в Redux */
-export interface AuthState {
-  user: User | null;
-  accessToken: string | null;
+export type AuthMode = 'login' | 'register';
+
+/** Шаг формы: данные или ввод кода из письма */
+export type AuthStep = 'form' | 'code';
+
+export interface AuthForm {
+  name: string;
+  email: string;
+  password: string;
+  code: string;
+}
+
+export interface UserState {
+  authData?: User;
+  isAuth: boolean;
   isLoading: boolean;
-  error: string | null;
+  error?: string;
+  isAuthModalOpen: boolean;
+  authMode: AuthMode;
+  authStep: AuthStep;
+  codeSent: boolean;
+  successMessage?: string;
+  form: AuthForm;
 }

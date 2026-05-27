@@ -61,7 +61,7 @@ export const Room: React.FC<RoomProps> = React.memo(({
         const [wallWidth, wallHeight] = wallData.size;
         const localPoint = e.object.worldToLocal(e.point.clone());
 
-        const margin = 0.1;
+        const margin = 0.1; // минимальный отступ от края
         const clampedX = Math.max(-wallWidth / 2 + margin, Math.min(wallWidth / 2 - margin, localPoint.x));
         const clampedY = Math.max(-wallHeight / 2 + margin, Math.min(wallHeight / 2 - margin, localPoint.y));
 

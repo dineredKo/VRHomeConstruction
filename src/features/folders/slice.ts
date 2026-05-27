@@ -27,15 +27,11 @@ export const { actions, name, reducer } = createSlice({
   initialState,
   reducers: {
     /** Добавить новую папку */
-    addFolder: (state, action: PayloadAction<Omit<Folder, 'createdAt' | 'projectIds' | 'layoutIds' | 'childFolderIds'>>) => {
-      const newFolder: Folder = {
-        ...action.payload,
-        createdAt: new Date().toISOString(),
-        projectIds: [],
-        layoutIds: [],
-        childFolderIds: [],
-      };
-      state.folders.push(newFolder);
+    addFolder: (state, action: PayloadAction<Folder>) => {
+      const existing = state.folders.find(f => f.id === action.payload.id);
+      if (!existing) {
+        state.folders.push(action.payload);
+      }
     },
     /** Удалить папку */
     removeFolder: (state, action: PayloadAction<string>) => {

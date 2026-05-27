@@ -5,7 +5,6 @@
  */
 
 import { RoomDimensions } from './ui/EditorScene';
-import type { FurnitureItem } from '@/features/furniture/types'
 
 /**
  * Проём (окно или дверь) на стене.
@@ -111,8 +110,6 @@ export interface EditorState {
   partitionColors: { [partitionId: string]: string };
   /** Идентификатор стены, выбранной для просмотра в 2D */
   viewedWallId: string;
-   /** Мебель, размещённая в комнате (для сохранения/загрузки) */
-  furnitureItems: FurnitureItem[];
   /** Выбранный пользователем проём для редактирования */
   selectedOpening: {
     wallId: string;
@@ -122,4 +119,6 @@ export interface EditorState {
   } | null;
   /** Выбранная перегородка для редактирования */
   selectedPartition: Partition | null;
+  /** ID текущего открытого проекта */
+  currentProjectId: string | null;
 }

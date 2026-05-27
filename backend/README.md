@@ -59,6 +59,8 @@ go run ./cmd/server/main.go
 
 - `PORT` — порт сервера (по умолчанию `8080`)
 - `MONGO_URI` — URI подключения к MongoDB (например `mongodb://localhost:27017`)
+- `JWT_SECRET` — секрет для подписи JWT (обязательно сменить в production)
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` — отправка кода на почту (опционально)
 
 Можно создать `.env` файл рядом с `docker-compose.yml` или передавать переменные в среде выполнения контейнера.
 
@@ -66,13 +68,23 @@ go run ./cmd/server/main.go
 
 Базовый префикс: `/api`
 
-Проекты (Projects):
+Авторизация (JWT):
 
-- `GET /api/projects` — получить список проектов (поддерживает `page`, `limit`, `status`)
-- `GET /api/projects/:id` — получить проект по ID
-- `POST /api/projects` — создать проект
-- `PUT /api/projects/:id` — обновить проект (включая `roomData`)
-- `DELETE /api/projects/:id` — удалить проект
+- `POST /api/auth/send-code` — отправить 6-значный код на email (`email`, `purpose`: `login`|`register`, для регистрации также `name`, `password`)
+- `POST /api/auth/verify-code` — подтвердить код (`email`, `code`, `purpose`) → `{ user, token }`
+- `GET /api/auth/me` — текущий пользователь (заголовок `Authorization: Bearer <token>`)
+
+Без настроенного SMTP код выводится в логи контейнера бэкенда (`[DEV EMAIL]`).
+
+Поле `user.id` — строковый идентификатор (не `_id`). Токен передавать во всех защищённых запросах.
+
+Проекты (Projects) — требуют `Authorization: Bearer <token>`:
+
+- `GET /api/projects` — список проектов **текущего пользователя** (`page`, `limit`, `status`)
+- `GET /api/projects/:id` — проект по ID (только свой)
+- `POST /api/projects` — создать проект (`userId` подставляется из токена)
+- `PUT /api/projects/:id` — обновить проект (только свой)
+- `DELETE /api/projects/:id` — удалить проект (только свой)
 
 Папки (Folders):
 
@@ -88,11 +100,18 @@ go run ./cmd/server/main.go
 - `PUT /api/layouts/:id` — обновить раскладку
 - `DELETE /api/layouts/:id` — удалить раскладку
 
-Пример: создание проекта
+Пример: регистрация и создание проекта
 
 ```bash
+# Регистрация
+curl -s -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Иван","email":"ivan@example.com","password":"secret12"}'
+
+# Создание проекта (подставьте token из ответа регистрации/логина)
 curl -X POST http://localhost:8080/api/projects \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{"name":"Гостиная","template":"modern"}'
 ```
 
@@ -130,7 +149,7 @@ go test ./... -v
 
 ## Производство: рекомендации
 
-- Добавить аутентификацию/авторизацию (JWT).
+- Аутентификация по JWT реализована; для папок и раскладок пока общий `user-1`.
 - Настроить TLS/HTTPS и reverse proxy (nginx или cloud LB).
 - Добавить мониторинг (Prometheus) и лог-агрегатор (ELK/Graylog).
 - Использовать ReplicaSet/Managed MongoDB для отказоустойчивости и резервного копирования.

@@ -1,52 +1,128 @@
 /**
- * Саги для авторизации.
- * Временно используют моковые данные; будут заменены на реальные запросы к API.
+ * Саги авторизации: код на email, подтверждение, восстановление сессии.
  * @module user/saga
  */
 
-import { put, takeLatest, delay } from 'typed-redux-saga';
+import { takeLatest, put, call, select, all } from 'typed-redux-saga';
+import { authApi } from '@/app/api';
+import { clearStoredToken, getStoredToken, setStoredToken } from '@/app/api/token';
+import type { AuthPurpose } from '@/app/api/auth';
 import { actions } from './slice';
+import { selectors } from './selectors';
 
-/** Временная база пользователей для отладки */
-const MOCK_USERS = [
-  { id: '1', name: 'Иван', email: 'ivan@example.com', password: '123456' },
-];
+/** Перезагрузить страницу после входа, чтобы подгрузить проекты пользователя */
+function reloadAfterAuth() {
+  window.location.reload();
+}
 
-function* handleLogin(action: ReturnType<typeof actions.loginRequested>) {
+/** Восстановить пользователя по сохранённому JWT */
+export function* restoreSession() {
+  const token = getStoredToken();
+  if (!token) {
+    return;
+  }
+
   try {
-    yield put(actions.setLoading(true));
-    yield delay(800);
-    const user = MOCK_USERS.find(
-      u => u.email === action.payload.email && u.password === action.payload.password
-    );
-    if (!user) throw new Error('Неверный email или пароль');
-    yield put(actions.authSuccess({
-      user: { id: user.id, name: user.name, email: user.email },
-      accessToken: 'mock_token',
-    }));
-  } catch (error: any) {
-    yield put(actions.authFailure(error.message || 'Ошибка входа'));
+    yield* put(actions.setLoading(true));
+    const user = yield* call(authApi.fetchMe);
+    yield* put(actions.setUser(user));
+  } catch {
+    clearStoredToken();
+    yield* put(actions.logout());
   } finally {
-    yield put(actions.setLoading(false));
+    yield* put(actions.setLoading(false));
   }
 }
 
-function* handleRegister(action: ReturnType<typeof actions.registerRequested>) {
+function* handleSendCode() {
+  yield* put(actions.setLoading(true));
+  yield* put(actions.setError(undefined));
+
   try {
-    yield put(actions.setLoading(true));
-    yield delay(800);
-    yield put(actions.authSuccess({
-      user: { id: `user_${Date.now()}`, name: action.payload.name, email: action.payload.email },
-      accessToken: 'mock_token',
-    }));
+    const form = yield* select(selectors.selectAuthForm);
+    const mode = yield* select(selectors.selectAuthMode);
+    const purpose: AuthPurpose = mode;
+
+    if (!form.email.trim() || !form.password) {
+      yield* put(actions.setError('Введите email и пароль'));
+      return;
+    }
+
+    if (purpose === 'register') {
+      if (!form.name.trim()) {
+        yield* put(actions.setError('Введите имя'));
+        return;
+      }
+      if (form.password.length < 6) {
+        yield* put(actions.setError('Пароль должен быть не короче 6 символов'));
+        return;
+      }
+    }
+
+    const result = yield* call(authApi.sendCode, form.email.trim(), purpose, {
+      name: form.name.trim(),
+      password: form.password,
+    });
+
+    yield* put(actions.setCodeSent(true));
+    if (result?.message) {
+      yield* put(actions.setSuccessMessage(result.message));
+    }
   } catch (error: any) {
-    yield put(actions.authFailure(error.message || 'Ошибка регистрации'));
+    const message = error?.message || 'Не удалось отправить код';
+    yield* put(actions.setError(message));
   } finally {
-    yield put(actions.setLoading(false));
+    yield* put(actions.setLoading(false));
   }
+}
+
+function* handleVerifyCode() {
+  try {
+    const form = yield* select(selectors.selectAuthForm);
+    const mode = yield* select(selectors.selectAuthMode);
+    const purpose: AuthPurpose = mode;
+
+    if (!form.email.trim() || !form.code.trim()) {
+      yield* put(actions.setError('Введите код из письма'));
+      return;
+    }
+
+    if (form.code.trim().length !== 6) {
+      yield* put(actions.setError('Код должен содержать 6 цифр'));
+      return;
+    }
+
+    yield* put(actions.setLoading(true));
+    yield* put(actions.setError(undefined));
+
+    const { user, token } = yield* call(
+      authApi.verifyCode,
+      form.email.trim(),
+      form.code.trim(),
+      purpose,
+    );
+
+    setStoredToken(token);
+    yield* put(actions.setUser(user));
+    reloadAfterAuth();
+  } catch (error: any) {
+    const message = error?.message || 'Неверный код';
+    yield* put(actions.setError(message));
+  } finally {
+    yield* put(actions.setLoading(false));
+  }
+}
+
+function* handleLogout() {
+  clearStoredToken();
+  reloadAfterAuth();
 }
 
 export function* initSaga() {
-  yield takeLatest(actions.loginRequested.type, handleLogin);
-  yield takeLatest(actions.registerRequested.type, handleRegister);
+  yield all([
+    takeLatest(actions.sendCodeRequested.type, handleSendCode),
+    takeLatest(actions.verifyCodeRequested.type, handleVerifyCode),
+    takeLatest(actions.logout.type, handleLogout),
+    takeLatest(actions.restoreSessionRequested.type, restoreSession),
+  ]);
 }

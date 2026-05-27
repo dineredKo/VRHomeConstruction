@@ -1,12 +1,14 @@
+/**
+ * Модальное окно создания папки.
+ * @module create-folder/ui/CreateFolderModal
+ */
+
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ModalsFeature } from '@/features/modals';
 import { CreateFolderFeature } from '../index';
 import styles from './CreateFolderModal.module.scss';
-/**
- * Модальное окно создания папки.
- * @module create-folder/ui/CreateFolderModal
- */
+
 export const CreateFolderModal = () => {
   const dispatch = useDispatch();
   const isModalOpen = useSelector(ModalsFeature.selectors.selectIsCreateFolderModalOpen);

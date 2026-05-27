@@ -1,13 +1,15 @@
+/**
+ * Страница "Мои проекты".
+ * @module pages/my-projects/ui/MyProjectPage
+ */
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { UniversalButtonFeature } from '@/features/universal-button';
 import { SearchBar } from '@/features/search/ui/SearchBar';
 import { ProjectsGrid } from '@/widgets/ProjectsGrid';
 import styles from './MyProjectPage.module.scss';
-/**
- * Страница "Мои проекты".
- * @module pages/my-projects/ui/MyProjectPage
- */
+
 export const MyProjectsPage = () => {
   return (
     <div className={styles.page}>
